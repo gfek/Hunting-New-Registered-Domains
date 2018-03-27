@@ -649,5 +649,5 @@ Socket Error: [Errno 54] Connection reset by peer
 ## Similar projects
 
 * **dnstiwst:** `https://github.com/elceef/dnstwist`
-* **phishing catcher:** `https://github.com/x0rz/phishing_catcher` (it consumes the https://certstream.calidog.io/ service`)
+* **phishing catcher:** `https://github.com/x0rz/phishing_catcher` 
 
