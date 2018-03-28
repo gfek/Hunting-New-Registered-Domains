@@ -8,7 +8,7 @@ The `hnrd.py` is a python utility for finding and analysing potential phishing d
 * Download a free list from [Whoisds](https://whoisds.com/newly-registered-domains)
 * Bitsquatting, hyphenation & domain permutation is used for the transformation of the given keyword
 * Generated words are searched/matched againsts the list
-* Retrieve `A` DNS Record(s) Information
+* Retrieve DNS Record(s) Information
 * Retrieve IP2ASN Information
 * Retrieve WHOIS Information
 * [Retrieve Reverse WHOIS (by Name) Information](https://domainbigdata.com)
