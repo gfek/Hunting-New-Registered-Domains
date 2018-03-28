@@ -79,9 +79,10 @@ def get_DNS_record_results():
 					DNSAdata = future.result()
 					for k,v in DNSAdata.iteritems():
 						print "    \_", k,colored(','.join(v), 'yellow')
-						aa=re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$",','.join(v))
-						if aa:
-							IPs.append(','.join(v))
+						for ip in v:
+							aa=re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$",ip)
+							if aa:
+								IPs.append(ip)
 				except Exception as exc:
 					print('%r generated an exception: %s' % (dom, exc))
 	except ValueError:
@@ -235,7 +236,7 @@ def get_EmailDomainBigData():
 	CreatedDomains=[]
 	try:
 		with concurrent.futures.ThreadPoolExecutor(max_workers=len(NAMES)) as executor:
-			future_to_rev_whois_domain={executor.submit(EmailDomainBigData, name): name for name in NAMES}
+			future_to_rev_whois_domain={executor.submit(EmailDomainBigData, name): name for name in set(NAMES)}
 			for future in concurrent.futures.as_completed(future_to_rev_whois_domain):
 				namedomaininfo=future_to_rev_whois_domain[future]
 				try:
