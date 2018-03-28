@@ -19,26 +19,74 @@ init()
 
 warnings.filterwarnings("ignore")
 
-def A_record(domain):
-	a=[]
+def DNS_Records(domain):
 
+	RES={}
+	MX=[]
+	NS=[]
+	A=[]
+	AAAA=[]
+	SOA=[]
+	CNAME=[]
+	
+	resolver = dns.resolver.Resolver()
+	resolver.timeout = 2
+	resolver.lifetime = 2
+
+	rrtypes=['A','MX','NS','AAAA','SOA']
+	for r in rrtypes:
+		try:
+			Aanswer=resolver.query(domain,r)
+			for answer in Aanswer:
+				if r=='A':
+					A.append(answer.address)
+					RES.update({r:A})
+				if r=='MX':
+					MX.append(answer.exchange.to_text()[:-1])
+					RES.update({r:MX})
+				if r=='NS':
+					NS.append(answer.target.to_text()[:-1])
+					RES.update({r:NS})
+				if r=='AAAA':
+					AAAA.append(answer.address)
+					RES.update({r:AAAA})
+				if r=='SOA':
+					SOA.append(answer.mname.to_text()[:-1])
+					RES.update({r:SOA})
+		except dns.resolver.NXDOMAIN:
+			pass
+		except dns.resolver.NoAnswer:
+			pass
+		except dns.name.EmptyLabel:
+			pass
+		except dns.resolver.NoNameservers:
+			pass
+		except dns.resolver.Timeout:
+			pass
+		except dns.exception.DNSException:
+			pass
+	return RES
+
+def get_DNS_record_results():
+	global IPs
 	try:
-		Aanswers = dns.resolver.query(domain, 'A')
-		for rdata in Aanswers:
-			a.append(rdata.address)
-	except dns.resolver.NXDOMAIN:
-		return "None"  
-	except dns.resolver.NoAnswer:
-		return "None"
-	except dns.name.EmptyLabel:
-		return "None"
-	except dns.resolver.NoNameservers:
-		return "None"
-	except dns.resolver.Timeout:
-		return "None"
-	except dns.exception.DNSException:
-		return "None"
-	return a
+		with concurrent.futures.ThreadPoolExecutor(max_workers=len(DOMAINS)) as executor:
+			future_to_domain={executor.submit(DNS_Records, domain):domain for domain in DOMAINS}
+			for future in concurrent.futures.as_completed(future_to_domain):
+				dom=future_to_domain[future]
+				print "  \_", colored(dom,'cyan')
+				try:
+					DNSAdata = future.result()
+					for k,v in DNSAdata.iteritems():
+						print "    \_", k,colored(','.join(v), 'yellow')
+						aa=re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$",','.join(v))
+						if aa:
+							IPs.append(','.join(v))
+				except Exception as exc:
+					print('%r generated an exception: %s' % (dom, exc))
+	except ValueError:
+		pass
+	return IPs
 
 def diff_dates(date1, date2):
 	return abs((date2-date1).days)
@@ -72,9 +120,9 @@ def whois_domain(domain_name):
 			creation_date=w_res.creation_date[0]
 			updated_date=w_res.updated_date[0]
 			expiration_date=w_res.expiration_date[0]
-
 			current_date=datetime.datetime.now()
 			res=diff_dates(current_date,creation_date)
+			
 			RES.update({"creation_date":creation_date, \
 				"creation_date_diff":res,\
 				"emails":emails,\
@@ -117,28 +165,6 @@ def get_IP2CIDR():
 	except ValueError:
 		pass
 			
-def get_A_record_results():
-	global IPs
-	try:
-		with concurrent.futures.ThreadPoolExecutor(max_workers=len(DOMAINS)) as executor:
-			future_to_domain={executor.submit(A_record, domain):domain for domain in DOMAINS}
-			for future in concurrent.futures.as_completed(future_to_domain):
-				dom=future_to_domain[future]
-				try:
-					DNSAdata = future.result()
-					if isinstance(DNSAdata,list):
-						print "  \_", colored(dom,'cyan'), colored(','.join(DNSAdata),'yellow')
-						for datares in DNSAdata:
-							if datares not in IPs:
-								IPs.append(datares)
-					else:
-						print "  \_", colored(dom,'cyan'), colored(DNSAdata,'yellow')
-				except Exception as exc:
-					print('%r generated an exception: %s' % (dom, exc))
-	except ValueError:
-		pass
-	return IPs
-
 def get_WHOIS_results():
 	global NAMES
 	try:
@@ -439,8 +465,9 @@ if __name__ == '__main__':
 
 	start = time.time()
 	
-	print "[*]-Retrieving A DNS Record(s) Information"
-	get_A_record_results()
+	print "[*]-Retrieving DNS Record(s) Information"
+	#get_A_record_results()
+	get_DNS_record_results()
 		
 	print "[*]-Retrieving IP2ASN Information"
 	get_IP2CIDR()
