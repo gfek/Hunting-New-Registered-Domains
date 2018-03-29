@@ -14,6 +14,8 @@ from termcolor import colored
 from bs4 import BeautifulSoup
 import warnings
 import json
+import Levenshtein
+import tldextract
 
 init()
 
@@ -423,11 +425,10 @@ def subdomain(search_word):
 	return out
 
 if __name__ == '__main__':
-
 	DOMAINS=[]
 	IPs=[]
 	NAMES=[]
-	parser = argparse.ArgumentParser(prog="hnrd.py",description='hunting newly registered domain')
+	parser = argparse.ArgumentParser(prog="hnrd.py",description='hunting newly registered domains')
 	parser.add_argument("-f", action="store", dest='date', help="date [format: year-month-date]",required=True)
 	parser.add_argument("-s", action="store", dest='search',help="search a keyword",required=True)
 	parser.add_argument("-v", action="version",version="%(prog)s v1.0")
@@ -493,5 +494,17 @@ if __name__ == '__main__':
 			print "  \_", colored(domain,'cyan'), colored(shannon_entropy(domain), 'yellow')
 		else:
 			print "  \_",colored(domain,'cyan'), shannon_entropy(domain)
+
+	print "[*]-Calculate Levenshtein Ratio"
+	for domain in DOMAINS:
+		ext_domain=tldextract.extract(domain)
+		LevWord1=ext_domain.domain
+		LevWord2=args.search
+		if Levenshtein.ratio(LevWord1, LevWord2) > 0.8:
+			print "  \_", colored(LevWord1, 'cyan'), "vs",colored(LevWord2,'cyan'), colored(Levenshtein.ratio(LevWord1, LevWord2),'red')
+		if Levenshtein.ratio(LevWord1, LevWord2) < 0.8 and Levenshtein.ratio(LevWord1, LevWord2) > 0.4:
+			print "  \_", colored(LevWord1, 'cyan'), "vs",colored(LevWord2,'cyan'), colored(Levenshtein.ratio(LevWord1, LevWord2),'yellow')
+		if Levenshtein.ratio(LevWord1, LevWord2) < 0.4:
+			print "  \_", colored(LevWord1, 'cyan'), "vs", colored(LevWord2,'cyan'), colored(Levenshtein.ratio(LevWord1, LevWord2),'green')
 
 	print (time.time() - start)
