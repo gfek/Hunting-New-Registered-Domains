@@ -15,6 +15,7 @@ The `hnrd.py` is a python utility for finding and analysing potential phishing d
 * [Retrieve Certficates](https://crt.sh)
 * Retirieve VirusTotal Information
 * Calculate Shannon Entropy Information
+* Calculate Levenshtein Ratio Distance
 
 ## Requirements
 
