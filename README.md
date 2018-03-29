@@ -27,6 +27,8 @@ The `hnrd.py` is a python utility for finding and analysing potential phishing d
 * beautifulsoup4
 * html5lib
 * termcolor
+* python-Levenshtein
+* tldextract
 
 ## Help
 
@@ -51,7 +53,7 @@ optional arguments:
   \_ twitter-2020.com
     \_ A 173.208.193.186
     \_ SOA ns1.webrand.co
-    \_ NS ns2.webrand.co,ns1.webrand.co
+    \_ NS ns1.webrand.co,ns2.webrand.co
     \_ MX twitter-2020.com
   \_ twitter-2030.com
     \_ A 173.208.193.186
@@ -62,10 +64,12 @@ optional arguments:
     \_ A 133.130.112.25
     \_ SOA ns1.twift.net
     \_ NS ns1.twift.net,ns2.twift.net
-  \_ twitter-url.com
-  \_ twitterenglish.com
   \_ twitterverifiedwelcome.com
-    \_ NS ns2.dreamhost.com,ns1.dreamhost.com,ns3.dreamhost.com
+    \_ NS ns3.dreamhost.com,ns1.dreamhost.com,ns2.dreamhost.com
+  \_ twitterenglish.com
+    \_ NS ns2.matbao.vn,ns1.matbao.vn
+  \_ twitter-url.com
+    \_ NS ns2.reg.cn,ns1.reg.cn
 [*]-Retrieving IP2ASN Information
   \_ 173.208.193.186
     \_ asn_registry arin
@@ -93,7 +97,7 @@ optional arguments:
     \_ Created Date 2018-03-27 07:50:18
     \_ Updated Date 2018-03-27 08:58:49
     \_ Expiration Date 2019-03-27 07:50:18
-    \_ DateDiff 2
+    \_ DateDiff 3
     \_ Name Whois Privacy Protection Service by onamae.com
     \_ Email abuse@gmo.jp,proxy@whoisprotectservice.com
     \_ Registrar GMO Internet, Inc. d/b/a Onamae.com
@@ -101,7 +105,7 @@ optional arguments:
     \_ Created Date 2018-03-27 03:23:21
     \_ Updated Date [datetime.datetime(2018, 3, 27, 3, 23, 21), datetime.datetime(2018, 3, 27, 3, 54, 19)]
     \_ Expiration Date 2019-03-27 03:23:21
-    \_ DateDiff 2
+    \_ DateDiff 3
     \_ Name Domain Admin
     \_ Email abuse@matbao.com,contact@privacyprotect.org
     \_ Registrar MAT BAO CORPORATION
@@ -109,10 +113,18 @@ optional arguments:
     \_ Created Date 2018-03-26 08:12:06
     \_ Updated Date 2018-03-26 08:12:07
     \_ Expiration Date 2019-03-26 08:12:06
-    \_ DateDiff 3
+    \_ DateDiff 4
     \_ Name PROXY PROTECTION LLC
     \_ Email W3Q46A8A36WY9XC@PROXY.DREAMHOST.COM,domain-abuse@dreamhost.com
     \_ Registrar DREAMHOST
+  \_ twitter-2020.com
+    \_ Created Date 2018-03-26 17:31:22
+    \_ Updated Date 2018-03-26 17:34:09
+    \_ Expiration Date 2019-03-26 17:31:22
+    \_ DateDiff 3
+    \_ Name Mohammed alhila
+    \_ Email abuse@name.com,m.iig@hotmail.com
+    \_ Registrar Name.com, Inc.
   \_ twitter-2030.com
     \_ Created Date 2018-03-26 17:31:21
     \_ Updated Date 2018-03-26 17:33:53
@@ -125,53 +137,28 @@ optional arguments:
     \_ Created Date 2018-03-26 07:06:52
     \_ Updated Date 2018-03-26 07:21:04
     \_ Expiration Date 2019-03-26 07:06:52
-    \_ DateDiff 3
+    \_ DateDiff 4
     \_ Name Ye Jian Hua
     \_ Email DomainAbuse@service.aliyun.com,yuidejjjo@126.com
     \_ Registrar HiChina Zhicheng Technology Ltd.
-  \_ twitter-2020.com
-    \_ Created Date 2018-03-26 17:31:22
-    \_ Updated Date 2018-03-26 17:34:09
-    \_ Expiration Date 2019-03-26 17:31:22
-    \_ DateDiff 3
-    \_ Name Mohammed alhila
-    \_ Email abuse@name.com,m.iig@hotmail.com
-    \_ Registrar Name.com, Inc.
 [*]-Retrieving Reverse WHOIS (by Name) Information [Source https://domainbigdata.com]
-  \_ Domain Admin
-    \_ 200 domain(s) have been created in the past
-  \_ Ye Jian Hua
-    \_ 136 domain(s) have been created in the past
-  \_ Mohammed alhila
-    \_ 110 domain(s) have been created in the past
-  \_ Mohammed alhila
-    \_ 110 domain(s) have been created in the past
-  \_ PROXY PROTECTION LLC
-    \_ 200 domain(s) have been created in the past
   \_ Whois Privacy Protection Service by onamae.com
     \_ 200 domain(s) have been created in the past
+  \_ Mohammed alhila
+    \_ 110 domain(s) have been created in the past
+  \_ Ye Jian Hua
+    \_ 136 domain(s) have been created in the past
+  \_ Domain Admin
+    \_ 200 domain(s) have been created in the past
+  \_ PROXY PROTECTION LLC
+    \_ 200 domain(s) have been created in the past
 [*]-Retrieving Certficates [Source https://crt.sh]
-  \_ tuwitter.info
+  \_ twitter-url.com
     \_ No CERT found
   \_ twitterenglish.com
     \_ No CERT found
-  \_ twitter-url.com
+  \_ tuwitter.info
     \_ No CERT found
-  \_ twitter-2020.com
-    \_ not_after 2018-06-24T23:59:59
-    \_ min_entry_timestamp 2018-03-26T22:17:31.294
-    \_ min_cert_id 367040205
-    \_ issuer_ca_id 12922
-    \_ name_value mail.twitter-2020.com
-    \_ issuer_name C=US, ST=TX, L=Houston, O="cPanel, Inc.", CN="cPanel, Inc. Certification Authority"
-    \_ not_before 2018-03-26T00:00:00
-    \_ not_after 2018-06-24T23:59:59
-    \_ min_entry_timestamp 2018-03-26T22:17:31.294
-    \_ min_cert_id 367040205
-    \_ issuer_ca_id 12922
-    \_ name_value www.twitter-2020.com
-    \_ issuer_name C=US, ST=TX, L=Houston, O="cPanel, Inc.", CN="cPanel, Inc. Certification Authority"
-    \_ not_before 2018-03-26T00:00:00
   \_ twitter-2030.com
     \_ not_after 2018-06-24T23:59:59
     \_ min_entry_timestamp 2018-03-26T21:55:18.393
@@ -187,6 +174,21 @@ optional arguments:
     \_ name_value www.twitter-2030.com
     \_ issuer_name C=US, ST=TX, L=Houston, O="cPanel, Inc.", CN="cPanel, Inc. Certification Authority"
     \_ not_before 2018-03-26T00:00:00
+  \_ twitter-2020.com
+    \_ not_after 2018-06-24T23:59:59
+    \_ min_entry_timestamp 2018-03-26T22:17:31.294
+    \_ min_cert_id 367040205
+    \_ issuer_ca_id 12922
+    \_ name_value mail.twitter-2020.com
+    \_ issuer_name C=US, ST=TX, L=Houston, O="cPanel, Inc.", CN="cPanel, Inc. Certification Authority"
+    \_ not_before 2018-03-26T00:00:00
+    \_ not_after 2018-06-24T23:59:59
+    \_ min_entry_timestamp 2018-03-26T22:17:31.294
+    \_ min_cert_id 367040205
+    \_ issuer_ca_id 12922
+    \_ name_value www.twitter-2020.com
+    \_ issuer_name C=US, ST=TX, L=Houston, O="cPanel, Inc.", CN="cPanel, Inc. Certification Authority"
+    \_ not_before 2018-03-26T00:00:00
   \_ twitterverifiedwelcome.com
     \_ not_after 2018-06-24T07:16:33
     \_ min_entry_timestamp 2018-03-26T08:16:33.376
@@ -198,20 +200,20 @@ optional arguments:
 [*]-Retrieving VirusTotal Information
   \_ twitter-2020.com
     \_ Domain not found
-  \_ twitterverifiedwelcome.com
-    \_ Domain not found
   \_ twitter-url.com
     \_ Resolutions (PDNS)
       \_ 2017-09-01 00:00:00 192.185.241.208
+  \_ twitter-2030.com
+    \_ Domain not found
   \_ twitterenglish.com
     \_ categories
       \_ uncategorized
     \_ Resolutions (PDNS)
       \_ 2016-01-15 00:00:00 125.253.125.67
       \_ 2015-03-06 00:00:00 64.31.42.235
-  \_ twitter-2030.com
-    \_ Domain not found
   \_ tuwitter.info
+    \_ Domain not found
+  \_ twitterverifiedwelcome.com
     \_ Domain not found
 [*]-Calculate Shannon Entropy Information
   \_ tuwitter.info 3.18083298721
@@ -220,8 +222,14 @@ optional arguments:
   \_ twitter-url.com 3.45656476213
   \_ twitterenglish.com 3.68354236243
   \_ twitterverifiedwelcome.com 3.5035391228
+[*]-Calculate Levenshtein Ratio
+  \_ tuwitter vs twitter 0.933333333333
+  \_ twitter-2020 vs twitter 0.736842105263
+  \_ twitter-2030 vs twitter 0.736842105263
+  \_ twitter-url vs twitter 0.777777777778
+  \_ twitterenglish vs twitter 0.666666666667
+  \_ twitterverifiedwelcome vs twitter 0.48275862069
 ```
-
 ## Similar projects
 
 * **dnstiwst:** `https://github.com/elceef/dnstwist`
