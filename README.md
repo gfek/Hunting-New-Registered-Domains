@@ -14,6 +14,7 @@ The `hnrd.py` is a python utility for finding and analysing potential phishing d
 * [Retrieve Reverse WHOIS (by Name) Information](https://domainbigdata.com)
 * [Retrieve Certficates](https://crt.sh)
 * Retirieve VirusTotal Information
+* Check domains against [QUAD9](https://quad9.net) service 
 * Calculate Shannon Entropy Information
 * Calculate Levenshtein Ratio Distance
 
@@ -47,189 +48,105 @@ optional arguments:
 
 ### Example
 
-`python hnrd.py -f 2018-03-27 -s twitter`
+`python hnrd.py -f 2018-03-30 -s paypal`
 
 ```
 [*]-Retrieving DNS Record(s) Information
-  \_ twitter-2020.com
-    \_ A 173.208.193.186
-    \_ SOA ns1.webrand.co
-    \_ NS ns1.webrand.co,ns2.webrand.co
-    \_ MX twitter-2020.com
-  \_ twitter-2030.com
-    \_ A 173.208.193.186
-    \_ SOA ns1.webrand.co
-    \_ NS ns1.webrand.co,ns2.webrand.co
-    \_ MX twitter-2030.com
-  \_ tuwitter.info
-    \_ A 133.130.112.25
-    \_ SOA ns1.twift.net
-    \_ NS ns1.twift.net,ns2.twift.net
-  \_ twitterverifiedwelcome.com
-    \_ NS ns3.dreamhost.com,ns1.dreamhost.com,ns2.dreamhost.com
-  \_ twitterenglish.com
-    \_ NS ns2.matbao.vn,ns1.matbao.vn
-  \_ twitter-url.com
-    \_ NS ns2.reg.cn,ns1.reg.cn
+  \_ paypal-required-action.com
+    \_ A 162.219.251.133
+    \_ SOA ns19.hosterbox.com
+    \_ NS ns19.hosterbox.com,ns20.hosterbox.com
+    \_ MX paypal-required-action.com
+  \_ paypal-resolvedbillingstatement.com
+    \_ A 74.220.199.6
 [*]-Retrieving IP2ASN Information
-  \_ 173.208.193.186
+  \_ 162.219.251.133
     \_ asn_registry arin
     \_ asn_country_code US
-    \_ asn_date 2009-12-17
-    \_ asn_cidr 173.208.128.0/17
-    \_ asn 32097
-    \_ asn_description WII-KC - WholeSale Internet, Inc., US
-  \_ 173.208.193.186
+    \_ asn_date 2013-08-21
+    \_ asn_cidr 162.219.251.0/24
+    \_ asn 33494
+    \_ asn_description IHNET - IHNetworks, LLC, US
+  \_ 74.220.199.6
     \_ asn_registry arin
     \_ asn_country_code US
-    \_ asn_date 2009-12-17
-    \_ asn_cidr 173.208.128.0/17
-    \_ asn 32097
-    \_ asn_description WII-KC - WholeSale Internet, Inc., US
-  \_ 133.130.112.25
-    \_ asn_registry apnic
-    \_ asn_country_code JP
-    \_ asn_date 1997-03-01
-    \_ asn_cidr 133.130.64.0/18
-    \_ asn 7506
-    \_ asn_description INTERQ GMO Internet,Inc, JP
+    \_ asn_date 2007-01-09
+    \_ asn_cidr 74.220.192.0/19
+    \_ asn 46606
+    \_ asn_description UNIFIEDLAYER-AS-1 - Unified Layer, US
 [*]-Retrieving WHOIS Information
-  \_ tuwitter.info
-    \_ Created Date 2018-03-27 07:50:18
-    \_ Updated Date 2018-03-27 08:58:49
-    \_ Expiration Date 2019-03-27 07:50:18
+  \_ paypal-required-action.com
+    \_ Created Date 2018-03-29 19:11:32
+    \_ Updated Date [datetime.datetime(2018, 3, 29, 19, 11, 32), datetime.datetime(2018, 3, 29, 19, 11, 41)]
+    \_ Expiration Date [datetime.datetime(2019, 3, 29, 19, 11, 32), datetime.datetime(2019, 3, 29, 20, 11, 32)]
     \_ DateDiff 3
-    \_ Name Whois Privacy Protection Service by onamae.com
-    \_ Email abuse@gmo.jp,proxy@whoisprotectservice.com
-    \_ Registrar GMO Internet, Inc. d/b/a Onamae.com
-  \_ twitterenglish.com
-    \_ Created Date 2018-03-27 03:23:21
-    \_ Updated Date [datetime.datetime(2018, 3, 27, 3, 23, 21), datetime.datetime(2018, 3, 27, 3, 54, 19)]
-    \_ Expiration Date 2019-03-27 03:23:21
-    \_ DateDiff 3
-    \_ Name Domain Admin
-    \_ Email abuse@matbao.com,contact@privacyprotect.org
-    \_ Registrar MAT BAO CORPORATION
-  \_ twitterverifiedwelcome.com
-    \_ Created Date 2018-03-26 08:12:06
-    \_ Updated Date 2018-03-26 08:12:07
-    \_ Expiration Date 2019-03-26 08:12:06
-    \_ DateDiff 4
-    \_ Name PROXY PROTECTION LLC
-    \_ Email W3Q46A8A36WY9XC@PROXY.DREAMHOST.COM,domain-abuse@dreamhost.com
-    \_ Registrar DREAMHOST
-  \_ twitter-2020.com
-    \_ Created Date 2018-03-26 17:31:22
-    \_ Updated Date 2018-03-26 17:34:09
-    \_ Expiration Date 2019-03-26 17:31:22
-    \_ DateDiff 3
-    \_ Name Mohammed alhila
-    \_ Email abuse@name.com,m.iig@hotmail.com
-    \_ Registrar Name.com, Inc.
-  \_ twitter-2030.com
-    \_ Created Date 2018-03-26 17:31:21
-    \_ Updated Date 2018-03-26 17:33:53
-    \_ Expiration Date 2019-03-26 17:31:21
-    \_ DateDiff 3
-    \_ Name Mohammed alhila
-    \_ Email abuse@name.com,m.iig@hotmail.com
-    \_ Registrar Name.com, Inc.
-  \_ twitter-url.com
-    \_ Created Date 2018-03-26 07:06:52
-    \_ Updated Date 2018-03-26 07:21:04
-    \_ Expiration Date 2019-03-26 07:06:52
-    \_ DateDiff 4
-    \_ Name Ye Jian Hua
-    \_ Email DomainAbuse@service.aliyun.com,yuidejjjo@126.com
-    \_ Registrar HiChina Zhicheng Technology Ltd.
+    \_ Name mario pichardo
+    \_ Email domain-abuse@psi-usa.info,pichardomario44@gmail.com
+    \_ Registrar PSI-USA, Inc. dba Domain Robot
+  \_ paypal-resolvedbillingstatement.com
+    \_ Created Date 2018-03-29 23:45:13
+    \_ Updated Date 2018-03-29 23:45:14
+    \_ Expiration Date 2019-03-29 23:45:13
+    \_ DateDiff 2
+    \_ Name DOMAIN PRIVACY SERVICE FBO REGISTRANT
+    \_ Email abuse@bluehost.com,WHOIS@BLUEHOST.COM
+    \_ Registrar FastDomain Inc.
 [*]-Retrieving Reverse WHOIS (by Name) Information [Source https://domainbigdata.com]
-  \_ Whois Privacy Protection Service by onamae.com
-    \_ 200 domain(s) have been created in the past
-  \_ Mohammed alhila
-    \_ 110 domain(s) have been created in the past
-  \_ Ye Jian Hua
-    \_ 136 domain(s) have been created in the past
-  \_ Domain Admin
-    \_ 200 domain(s) have been created in the past
-  \_ PROXY PROTECTION LLC
+  \_ mario pichardo
+    \_ 3 domain(s) have been created in the past
+  \_ DOMAIN PRIVACY SERVICE FBO REGISTRANT
     \_ 200 domain(s) have been created in the past
 [*]-Retrieving Certficates [Source https://crt.sh]
-  \_ twitter-url.com
+  \_ paypal-resolvedbillingstatement.com
     \_ No CERT found
-  \_ twitterenglish.com
-    \_ No CERT found
-  \_ tuwitter.info
-    \_ No CERT found
-  \_ twitter-2030.com
-    \_ not_after 2018-06-24T23:59:59
-    \_ min_entry_timestamp 2018-03-26T21:55:18.393
-    \_ min_cert_id 367016831
+  \_ paypal-required-action.com
+    \_ not_after 2018-06-28T23:59:59
+    \_ min_entry_timestamp 2018-03-30T07:07:18.128
+    \_ min_cert_id 370495406
     \_ issuer_ca_id 12922
-    \_ name_value mail.twitter-2030.com
+    \_ name_value mail.paypal-required-action.com
     \_ issuer_name C=US, ST=TX, L=Houston, O="cPanel, Inc.", CN="cPanel, Inc. Certification Authority"
-    \_ not_before 2018-03-26T00:00:00
-    \_ not_after 2018-06-24T23:59:59
-    \_ min_entry_timestamp 2018-03-26T21:55:18.393
-    \_ min_cert_id 367016831
+    \_ not_before 2018-03-30T00:00:00
+    \_ not_after 2018-06-28T23:59:59
+    \_ min_entry_timestamp 2018-03-30T07:07:18.128
+    \_ min_cert_id 370495406
     \_ issuer_ca_id 12922
-    \_ name_value www.twitter-2030.com
+    \_ name_value www.paypal-required-action.com
     \_ issuer_name C=US, ST=TX, L=Houston, O="cPanel, Inc.", CN="cPanel, Inc. Certification Authority"
-    \_ not_before 2018-03-26T00:00:00
-  \_ twitter-2020.com
-    \_ not_after 2018-06-24T23:59:59
-    \_ min_entry_timestamp 2018-03-26T22:17:31.294
-    \_ min_cert_id 367040205
-    \_ issuer_ca_id 12922
-    \_ name_value mail.twitter-2020.com
-    \_ issuer_name C=US, ST=TX, L=Houston, O="cPanel, Inc.", CN="cPanel, Inc. Certification Authority"
-    \_ not_before 2018-03-26T00:00:00
-    \_ not_after 2018-06-24T23:59:59
-    \_ min_entry_timestamp 2018-03-26T22:17:31.294
-    \_ min_cert_id 367040205
-    \_ issuer_ca_id 12922
-    \_ name_value www.twitter-2020.com
-    \_ issuer_name C=US, ST=TX, L=Houston, O="cPanel, Inc.", CN="cPanel, Inc. Certification Authority"
-    \_ not_before 2018-03-26T00:00:00
-  \_ twitterverifiedwelcome.com
-    \_ not_after 2018-06-24T07:16:33
-    \_ min_entry_timestamp 2018-03-26T08:16:33.376
-    \_ min_cert_id 366445375
-    \_ issuer_ca_id 16418
-    \_ name_value www.twitterverifiedwelcome.com
-    \_ issuer_name C=US, O=Let's Encrypt, CN=Let's Encrypt Authority X3
-    \_ not_before 2018-03-26T07:16:33
+    \_ not_before 2018-03-30T00:00:00
 [*]-Retrieving VirusTotal Information
-  \_ twitter-2020.com
-    \_ Domain not found
-  \_ twitter-url.com
-    \_ Resolutions (PDNS)
-      \_ 2017-09-01 00:00:00 192.185.241.208
-  \_ twitter-2030.com
-    \_ Domain not found
-  \_ twitterenglish.com
+  \_ paypal-required-action.com
+    \_ Detected URLs
+      \_ http://paypal-required-action.com/signin/?country.x=&amp;locale.x=en_EN 10 / 68 2018-03-30 13:04:22
+      \_ http://paypal-required-action.com/signin/?country.x=&locale.x=it_IT 10 / 67 2018-03-30 12:39:00
+      \_ http://paypal-required-action.com/signin/?country.x=&amp;locale.x=it_IT 10 / 67 2018-03-30 12:37:59
+      \_ http://paypal-required-action.com/signin 9 / 67 2018-03-30 12:22:42
+      \_ http://paypal-required-action.com/signin/ 8 / 68 2018-03-30 10:30:01
+      \_ https://paypal-required-action.com/ 1 / 67 2018-03-30 08:03:02
+    \_ Detected Download Samples
+      \_ 2018-03-30 13:12:15 2 / 59 84d698d294b28a3ea1413c162e23f28e42a7a6c49669004e67dcf01867b5e7f4
+      \_ 2018-03-30 12:46:13 2 / 59 91b9a986026cc24bd46a3a9c868606b47164554f87c8f03e2f9725bfc29b52fb
+      \_ 2018-03-30 12:45:19 2 / 59 3aab8ffed0e0aec6f2551170c72f8fb4bb4a82891efdb16df14b25fd96dee52e
     \_ categories
-      \_ uncategorized
+      \_ dynamic content
+    \_ Subdomains
+      \_ www.paypal-required-action.com
+      \_ mail.paypal-required-action.com
     \_ Resolutions (PDNS)
-      \_ 2016-01-15 00:00:00 125.253.125.67
-      \_ 2015-03-06 00:00:00 64.31.42.235
-  \_ tuwitter.info
+      \_ 2018-03-30 00:00:00 162.219.251.133
+  \_ paypal-resolvedbillingstatement.com
     \_ Domain not found
-  \_ twitterverifiedwelcome.com
-    \_ Domain not found
+[*]-Check domains against QUAD9 service
+  \_ paypal-required-action.com
+    \_ Blocked
+  \_ paypal-resolvedbillingstatement.com
+    \_ Not Blocled
 [*]-Calculate Shannon Entropy Information
-  \_ tuwitter.info 3.18083298721
-  \_ twitter-2020.com 3.45281953111
-  \_ twitter-2030.com 3.57781953111
-  \_ twitter-url.com 3.45656476213
-  \_ twitterenglish.com 3.68354236243
-  \_ twitterverifiedwelcome.com 3.5035391228
+  \_ paypal-required-action.com 3.97909789113
+  \_ paypal-resolvedbillingstatement.com 4.05757515968
 [*]-Calculate Levenshtein Ratio
-  \_ tuwitter vs twitter 0.933333333333
-  \_ twitter-2020 vs twitter 0.736842105263
-  \_ twitter-2030 vs twitter 0.736842105263
-  \_ twitter-url vs twitter 0.777777777778
-  \_ twitterenglish vs twitter 0.666666666667
-  \_ twitterverifiedwelcome vs twitter 0.48275862069
+  \_ paypal-required-action vs paypal 0.428571428571
+  \_ paypal-resolvedbillingstatement vs paypal 0.324324324324
 ```
 ## Similar projects
 
