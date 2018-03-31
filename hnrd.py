@@ -32,8 +32,8 @@ def DNS_Records(domain):
 	CNAME=[]
 	
 	resolver = dns.resolver.Resolver()
-	resolver.timeout = 2
-	resolver.lifetime = 2
+	resolver.timeout = 1
+	resolver.lifetime = 1
 
 	rrtypes=['A','MX','NS','AAAA','SOA']
 	for r in rrtypes:
@@ -355,6 +355,42 @@ def getVTDomainReport():
 	except ValueError:
 		pass
 
+def quad9(domain):
+	resolver = dns.resolver.Resolver()
+	resolver.nameservers = ['9.9.9.9']
+	resolver.timeout = 1
+	resolver.lifetime = 1
+
+	try:
+		Aanswers = resolver.query(domain, 'A')
+	except dns.resolver.NXDOMAIN:
+		return "Blocked"
+	except dns.resolver.NoAnswer:
+		pass
+	except dns.name.EmptyLabel:
+		pass
+	except dns.resolver.NoNameservers:
+		pass
+	except dns.resolver.Timeout:
+		pass
+	except dns.exception.DNSException:
+		pass
+
+def get_quad9_results():
+	with concurrent.futures.ThreadPoolExecutor(max_workers=len(DOMAINS)) as executor:
+		future_to_quad9={executor.submit(quad9, domain):domain for domain in DOMAINS}
+		for future in concurrent.futures.as_completed(future_to_quad9):
+			quad9_domain=future_to_quad9[future]
+			print "  \_", colored(quad9_domain,'cyan')
+			try:
+				QUAD9NXDOMAIN = future.result()
+				if QUAD9NXDOMAIN is not None:
+					print "    \_", colored(QUAD9NXDOMAIN,'red')
+				else:
+					print "    \_", colored("Not Blocled",'yellow')
+			except Exception as exc:
+				print('%r generated an exception: %s' % (quad9_domain, exc))
+
 def shannon_entropy(domain):
 	import math
 	from sets import Set
@@ -468,7 +504,6 @@ if __name__ == '__main__':
 	start = time.time()
 	
 	print "[*]-Retrieving DNS Record(s) Information"
-	#get_A_record_results()
 	get_DNS_record_results()
 		
 	print "[*]-Retrieving IP2ASN Information"
@@ -485,6 +520,9 @@ if __name__ == '__main__':
 
 	print "[*]-Retrieving VirusTotal Information"
 	getVTDomainReport()
+
+	print "[*]-Check domains against QUAD9 service"
+	get_quad9_results()
 
 	print "[*]-Calculate Shannon Entropy Information"
 	for domain in DOMAINS:
