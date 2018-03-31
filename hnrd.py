@@ -377,20 +377,23 @@ def quad9(domain):
 		pass
 
 def get_quad9_results():
-	with concurrent.futures.ThreadPoolExecutor(max_workers=len(DOMAINS)) as executor:
-		future_to_quad9={executor.submit(quad9, domain):domain for domain in DOMAINS}
-		for future in concurrent.futures.as_completed(future_to_quad9):
-			quad9_domain=future_to_quad9[future]
-			print "  \_", colored(quad9_domain,'cyan')
-			try:
-				QUAD9NXDOMAIN = future.result()
-				if QUAD9NXDOMAIN is not None:
-					print "    \_", colored(QUAD9NXDOMAIN,'red')
-				else:
-					print "    \_", colored("Not Blocled",'yellow')
-			except Exception as exc:
-				print('%r generated an exception: %s' % (quad9_domain, exc))
-
+	try:
+		with concurrent.futures.ThreadPoolExecutor(max_workers=len(DOMAINS)) as executor:
+			future_to_quad9={executor.submit(quad9, domain):domain for domain in DOMAINS}
+			for future in concurrent.futures.as_completed(future_to_quad9):
+				quad9_domain=future_to_quad9[future]
+				print "  \_", colored(quad9_domain,'cyan')
+				try:
+					QUAD9NXDOMAIN = future.result()
+					if QUAD9NXDOMAIN is not None:
+						print "    \_", colored(QUAD9NXDOMAIN,'red')
+					else:
+						print "    \_", colored("Not Blocled",'yellow')
+				except Exception as exc:
+					print('%r generated an exception: %s' % (quad9_domain, exc))
+	except ValueError:
+		pass
+		
 def shannon_entropy(domain):
 	import math
 	from sets import Set
