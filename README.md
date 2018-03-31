@@ -150,6 +150,6 @@ optional arguments:
 ```
 ## Similar projects
 
-* **dnstiwst:** `https://github.com/elceef/dnstwist`
-* **phishing catcher:** `https://github.com/x0rz/phishing_catcher` 
+* [**dnstiwst**](https://github.com/elceef/dnstwist)
+* [**phishing catcher**](https://github.com/x0rz/phishing_catcher)
 
