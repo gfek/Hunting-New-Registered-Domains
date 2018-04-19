@@ -1,7 +1,7 @@
 # Hunting-Newly-Registered-Domains
 Hunting Newly Registered Domains
 
-The `hnrd.py` is a python utility for finding and analysing potential phishing domains used in phishing campaigns targeting your customers. This utility is written in python 2.7 and is based on the analysis of the features below by consuming a free daily list provided by the [Whoisds](https://whoisds.com/newly-registered-domains) site. 
+The `hnrd.py` is a python utility for finding and analysing potential phishing domains used in phishing campaigns targeting your customers. This utility is written in python (2.7 and 3) and is based on the analysis of the features below by consuming a free daily list provided by the [Whoisds](https://whoisds.com/newly-registered-domains) site. 
 
 ## Features
 
