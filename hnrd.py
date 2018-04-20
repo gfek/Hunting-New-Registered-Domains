@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import concurrent.futures
 import dns.resolver
 import whois
@@ -17,6 +19,12 @@ import json
 import Levenshtein
 import tldextract
 
+
+try:
+	from sets import Set as set
+except ModuleNotFoundError:
+	pass
+
 init()
 
 warnings.filterwarnings("ignore")
@@ -30,7 +38,7 @@ def DNS_Records(domain):
 	AAAA=[]
 	SOA=[]
 	CNAME=[]
-	
+
 	resolver = dns.resolver.Resolver()
 	resolver.timeout = 1
 	resolver.lifetime = 1
@@ -76,17 +84,17 @@ def get_DNS_record_results():
 			future_to_domain={executor.submit(DNS_Records, domain):domain for domain in DOMAINS}
 			for future in concurrent.futures.as_completed(future_to_domain):
 				dom=future_to_domain[future]
-				print "  \_", colored(dom,'cyan')
+				print("  \_", colored(dom,'cyan'))
 				try:
 					DNSAdata = future.result()
-					for k,v in DNSAdata.iteritems():
-						print "    \_", k,colored(','.join(v), 'yellow')
+					for k,v in DNSAdata.items():
+						print("    \_", k,colored(','.join(v), 'yellow'))
 						for ip in v:
 							aa=re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$",ip)
 							if aa:
 								IPs.append(ip)
 				except Exception as exc:
-					print('%r generated an exception: %s' % (dom, exc))
+					print(('%r generated an exception: %s' % (dom, exc)))
 	except ValueError:
 		pass
 	return IPs
@@ -99,7 +107,7 @@ def whois_domain(domain_name):
 	import datetime
 	RES={}
 
-	try:	
+	try:
 		w_res=whois.whois(domain_name)
 		name=w_res.name
 		creation_date=w_res.creation_date
@@ -125,7 +133,7 @@ def whois_domain(domain_name):
 			expiration_date=w_res.expiration_date[0]
 			current_date=datetime.datetime.now()
 			res=diff_dates(current_date,creation_date)
-			
+
 			RES.update({"creation_date":creation_date, \
 				"creation_date_diff":res,\
 				"emails":emails,\
@@ -133,12 +141,12 @@ def whois_domain(domain_name):
 				"registrar":registrar,\
 				"updated_date":updated_date,\
 				"expiration_date":expiration_date})
-		
+
 		time.sleep(2)
 	except TypeError:
 		pass
 	except whois.parser.PywhoisError:
-		print colored("No match for domain: {}.".format(domain_name),'red')
+		print(colored("No match for domain: {}.".format(domain_name),'red'))
 	except AttributeError:
 		pass
 	return RES
@@ -158,16 +166,16 @@ def get_IP2CIDR():
 			future_to_ip2asn={executor.submit(IP2CIDR, ip):ip for ip in IPs}
 			for future in concurrent.futures.as_completed(future_to_ip2asn):
 				ipaddress=future_to_ip2asn[future]
-				print "  \_",colored(ipaddress, 'cyan')
+				print("  \_",colored(ipaddress, 'cyan'))
 				try:
 					data = future.result()
-					for k,v in data.iteritems():
-						print "    \_", k, colored(v, 'yellow')
+					for k,v in data.items():
+						print("    \_", k, colored(v, 'yellow'))
 				except Exception as exc:
-					print('%r generated an exception: %s' % (ipaddress, exc))
+					print(('%r generated an exception: %s' % (ipaddress, exc)))
 	except ValueError:
 		pass
-			
+
 def get_WHOIS_results():
 	global NAMES
 	try:
@@ -178,7 +186,7 @@ def get_WHOIS_results():
 				try:
 					whois_data = future.result()
 					if whois_data:
-						for k,v in whois_data.iteritems():
+						for k,v in whois_data.items():
 							if 'creation_date' in k:
 								cd=whois_data.get('creation_date')
 							if 'updated_date' in k:
@@ -193,16 +201,16 @@ def get_WHOIS_results():
 								email=whois_data.get('emails')
 							if 'registrar' in k:
 								reg=whois_data.get('registrar')
-						
+
 						if isinstance(email,list):
-							print "  \_", colored(dwhois,'cyan'), \
+							print("  \_", colored(dwhois,'cyan'), \
 							"\n    \_ Created Date", colored(cd, 'yellow'), \
 							"\n    \_ Updated Date", colored(ud, 'yellow'), \
 							"\n    \_ Expiration Date", colored(ed, 'yellow'), \
 							"\n    \_ DateDiff", colored(cdd, 'yellow'), \
 							"\n    \_ Name",colored(name, 'yellow'),\
 							"\n    \_ Email", colored(','.join(email), 'yellow'), \
-							"\n    \_ Registrar", colored(reg, 'yellow')
+							"\n    \_ Registrar", colored(reg, 'yellow'))
 
 							if isinstance(name,list):
 								for n in name:
@@ -210,17 +218,17 @@ def get_WHOIS_results():
 							else:
 								NAMES.append(name)
 						else:
-								print "  \_ ", colored(dwhois,'cyan'), \
+								print("  \_ ", colored(dwhois,'cyan'), \
 								"\n    \_ Created Date", colored(cd, 'yellow'), \
 								"\n    \_ Updated Date", colored(ud, 'yellow'), \
 								"\n    \_ Expiration Date", colored(ed, 'yellow'), \
 								"\n    \_ DateDiff", colored(cdd, 'yellow'), \
 								"\n    \_ Name",colored(name, 'yellow'),\
 								"\n    \_ Email", colored(email, 'yellow'),	\
-								"\n    \_ Registrar", colored(reg, 'yellow')
+								"\n    \_ Registrar", colored(reg, 'yellow'))
 
 				except Exception as exc:
-					print('%r generated an exception: %s' % (dwhois, exc))
+					print(('%r generated an exception: %s' % (dwhois, exc)))
 	except ValueError:
 		pass
 	return NAMES
@@ -243,7 +251,7 @@ def get_EmailDomainBigData():
 				namedomaininfo=future_to_rev_whois_domain[future]
 				try:
 					rev_whois_data = future.result()
-					print "  \_", colored(namedomaininfo,'cyan')
+					print("  \_", colored(namedomaininfo,'cyan'))
 					CreatedDomains[:] = []
 					if rev_whois_data is not None:
 						for row in rev_whois_data.findAll("tr"):
@@ -251,12 +259,12 @@ def get_EmailDomainBigData():
 								cells = row.findAll("td")
 								if len(cells) == 3:
 									CreatedDomains.append(colored(cells[0].find(text=True)))
-						
-						print "    \_", colored(str(len(CreatedDomains)-1) + " domain(s) have been created in the past",'yellow')
+
+						print("    \_", colored(str(len(CreatedDomains)-1) + " domain(s) have been created in the past",'yellow'))
 					else:
-						print "    \_", colored(str(len(CreatedDomains)) + " domain(s) have been created in the past",'yellow')
+						print("    \_", colored(str(len(CreatedDomains)) + " domain(s) have been created in the past",'yellow'))
 				except Exception as exc:
-					print('%r generated an exception: %s' % (namedomaininfo, exc))
+					print(('%r generated an exception: %s' % (namedomaininfo, exc)))
 	except ValueError:
 		pass
 
@@ -274,17 +282,17 @@ def getcrt():
 			future_to_crt={executor.submit(crt, domain):domain for domain in DOMAINS}
 			for future in concurrent.futures.as_completed(future_to_crt):
 				d=future_to_crt[future]
-				print "  \_", colored(d,'cyan')
+				print("  \_", colored(d,'cyan'))
 				try:
 					crtdata=future.result()
 					if len(crtdata)>0:
 						for crtd in crtdata:
-							for k,v in crtd.iteritems():
-								print "    \_",k,colored(v,'yellow')
+							for k,v in crtd.items():
+								print("    \_",k,colored(v,'yellow'))
 					else:
-						print "    \_", colored("No CERT found",'red')
+						print("    \_", colored("No CERT found",'red'))
 				except Exception as exc:
-					print "    \_",colored(exc,'red')
+					print("    \_",colored(exc,'red'))
 	except ValueError:
 		pass
 
@@ -301,57 +309,57 @@ def getVTDomainReport():
 			future_to_vt={executor.submit(VTDomainReport, domain):domain for domain in DOMAINS}
 			for future in concurrent.futures.as_completed(future_to_vt):
 				d=future_to_vt[future]
-				print "  \_",colored(d,'cyan')
+				print("  \_",colored(d,'cyan'))
 				try:
 					vtdata = future.result()
 					if vtdata['response_code']==1:
 						if 'detected_urls' in vtdata:
 							if len(vtdata['detected_urls'])>0:
-								print "    \_",colored("Detected URLs",'red')
+								print("    \_",colored("Detected URLs",'red'))
 								for det_urls in vtdata['detected_urls']:
-									print "      \_", colored(det_urls['url'],'yellow'),\
+									print("      \_", colored(det_urls['url'],'yellow'),\
 									colored(det_urls['positives'],'yellow'), \
 									"/", \
 									colored(det_urls['total'],'yellow'),\
-									colored(det_urls['scan_date'],'yellow')
+									colored(det_urls['scan_date'],'yellow'))
 						if 'detected_downloaded_samples' in vtdata:
 							if len(vtdata['detected_downloaded_samples'])>0:
-								print "    \_",colored("Detected Download Samples",'red')
+								print("    \_",colored("Detected Download Samples",'red'))
 								for det_donw_samples in vtdata['detected_downloaded_samples']:
-									print "      \_", colored(det_donw_samples['date'],'yellow'),\
+									print("      \_", colored(det_donw_samples['date'],'yellow'),\
 									colored(det_donw_samples['positives'],'yellow'), \
 									"/", \
 									colored(det_donw_samples['total'],'yellow'),\
-									colored(det_donw_samples['sha256'],'yellow')
+									colored(det_donw_samples['sha256'],'yellow'))
 						if 'detected_communicating_samples' in vtdata:
 							if len(vtdata['detected_communicating_samples'])>0:
-								print "    \_",colored("Detected Communication Samples",'red')
+								print("    \_",colored("Detected Communication Samples",'red'))
 								for det_comm_samples in vtdata['detected_communicating_samples']:
-									print "      \_", colored(det_comm_samples['date'],'yellow'),\
+									print("      \_", colored(det_comm_samples['date'],'yellow'),\
 									colored(det_comm_samples['positives'],'yellow'), \
 									"/", \
 									colored(det_comm_samples['total'],'yellow'),\
-									colored(det_comm_samples['sha256'],'yellow')
+									colored(det_comm_samples['sha256'],'yellow'))
 						if 'categories' in vtdata:
 							if len(vtdata['categories'])>0:
-								print "    \_",colored("categories",'red')
+								print("    \_",colored("categories",'red'))
 								for ctg in vtdata['categories']:
-									print "      \_", colored(ctg,'yellow')
+									print("      \_", colored(ctg,'yellow'))
 						if 'subdomains' in vtdata:
 							if len(vtdata['subdomains'])>0:
-								print "    \_",colored("Subdomains",'red')
+								print("    \_",colored("Subdomains",'red'))
 								for vt_domain in vtdata['subdomains']:
-									print "      \_", colored(vt_domain,'yellow')
+									print("      \_", colored(vt_domain,'yellow'))
 						if 'resolutions' in vtdata:
 							if len(vtdata['resolutions'])>0:
-								print "    \_",colored("Resolutions (PDNS)",'red')
+								print("    \_",colored("Resolutions (PDNS)",'red'))
 								for vt_resolution in vtdata['resolutions']:
-									print "      \_", colored(vt_resolution['last_resolved'],'yellow'),\
-									colored(vt_resolution['ip_address'],'yellow')
+									print("      \_", colored(vt_resolution['last_resolved'],'yellow'),\
+									colored(vt_resolution['ip_address'],'yellow'))
 					else:
-						print "    \_", colored(vtdata['verbose_msg'],'yellow')
+						print("    \_", colored(vtdata['verbose_msg'],'yellow'))
 				except Exception as exc:
-					print "    \_", colored(exc,'red')
+					print("    \_", colored(exc,'red'))
 	except ValueError:
 		pass
 
@@ -382,24 +390,24 @@ def get_quad9_results():
 			future_to_quad9={executor.submit(quad9, domain):domain for domain in DOMAINS}
 			for future in concurrent.futures.as_completed(future_to_quad9):
 				quad9_domain=future_to_quad9[future]
-				print "  \_", colored(quad9_domain,'cyan')
+				print("  \_", colored(quad9_domain,'cyan'))
 				try:
 					QUAD9NXDOMAIN = future.result()
 					if QUAD9NXDOMAIN is not None:
-						print "    \_", colored(QUAD9NXDOMAIN,'red')
+						print("    \_", colored(QUAD9NXDOMAIN,'red'))
 					else:
-						print "    \_", colored("Not Blocked",'yellow')
+						print("    \_", colored("Not Blocled",'yellow'))
 				except Exception as exc:
-					print('%r generated an exception: %s' % (quad9_domain, exc))
+					print(('%r generated an exception: %s' % (quad9_domain, exc)))
 	except ValueError:
 		pass
-		
+
 def shannon_entropy(domain):
 	import math
-	from sets import Set
+
 
 	stList = list(domain)
-	alphabet = list(Set(domain)) # list of symbols in the string
+	alphabet = list(set(domain)) # list of symbols in the string
 	freqList = []
 
 	for symbol in alphabet:
@@ -422,7 +430,7 @@ def donwnload_nrd(d):
 		try:
 			resp = requests.get(nrd_zip,stream=True)
 
-			print "Downloading File {} - Size {}...".format(d+'.zip',resp.headers['Content-length'])
+			print("Downloading File {} - Size {}...".format(d+'.zip',resp.headers['Content-length']))
 			if resp.headers['Content-length']:
 				with open(d+".zip", 'wb') as f:
 					for data in resp.iter_content(chunk_size=1024):
@@ -431,10 +439,10 @@ def donwnload_nrd(d):
 					zip = zipfile.ZipFile(d+".zip")
 					zip.extractall()
 				except:
-					print "File is not a zip file."
+					print("File is not a zip file.")
 					sys.exit()
 		except:
-			print "File {}.zip does not exist on the remore server.".format(d)
+			print("File {}.zip does not exist on the remore server.".format(d))
 			sys.exit()
 
 def bitsquatting(search_word):
@@ -478,18 +486,18 @@ if __name__ == '__main__':
 	if matchObj:
 		donwnload_nrd(args.date)
 	else:
-		print "Not a correct input (example: 2010-10-10)"
+		print("Not a correct input (example: 2010-10-10)")
 		sys.exit()
 
 	try:
 		f = open(args.date + '.txt','r')
 	except:
-		print "No such file or directory {}.zip found. Trying domain-names.txt.".format(args.date)
-	
+		print("No such file or directory {}.zip found. Trying domain-names.txt.".format(args.date))
+
 		try:
 			f = open('domain-names.txt','r')
 		except:
-			print "No such file or directory domain-names.txt found"
+			print("No such file or directory domain-names.txt found")
 			sys.exit()
 
 	bitsquatting_search=bitsquatting(args.search)
@@ -499,53 +507,53 @@ if __name__ == '__main__':
 	search_all.append(args.search)
 
 	for row in f:
-		for argssearch in search_all:	
+		for argssearch in search_all:
 			match = re.search(r"^"+argssearch,row)
 			if match:
 				DOMAINS.append(row.strip('\r\n'))
 
 	start = time.time()
-	
-	print "[*]-Retrieving DNS Record(s) Information"
+
+	print("[*]-Retrieving DNS Record(s) Information")
 	get_DNS_record_results()
-		
-	print "[*]-Retrieving IP2ASN Information"
+
+	print("[*]-Retrieving IP2ASN Information")
 	get_IP2CIDR()
 
-	print "[*]-Retrieving WHOIS Information"
+	print("[*]-Retrieving WHOIS Information")
 	get_WHOIS_results()
-		
-	print "[*]-Retrieving Reverse WHOIS (by Name) Information [Source https://domainbigdata.com]"
+
+	print("[*]-Retrieving Reverse WHOIS (by Name) Information [Source https://domainbigdata.com]")
 	get_EmailDomainBigData()
 
-	print "[*]-Retrieving Certficates [Source https://crt.sh]"
+	print("[*]-Retrieving Certficates [Source https://crt.sh]")
 	getcrt()
 
-	print "[*]-Retrieving VirusTotal Information"
+	print("[*]-Retrieving VirusTotal Information")
 	getVTDomainReport()
 
-	print "[*]-Check domains against QUAD9 service"
+	print("[*]-Check domains against QUAD9 service")
 	get_quad9_results()
 
-	print "[*]-Calculate Shannon Entropy Information"
+	print("[*]-Calculate Shannon Entropy Information")
 	for domain in DOMAINS:
 		if shannon_entropy(domain) > 4:
-			print "  \_", colored(domain,'cyan'), colored(shannon_entropy(domain), 'red')
+			print("  \_", colored(domain,'cyan'), colored(shannon_entropy(domain), 'red'))
 		elif shannon_entropy(domain) > 3.5 and shannon_entropy(domain) < 4:
-			print "  \_", colored(domain,'cyan'), colored(shannon_entropy(domain), 'yellow')
+			print("  \_", colored(domain,'cyan'), colored(shannon_entropy(domain), 'yellow'))
 		else:
-			print "  \_",colored(domain,'cyan'), shannon_entropy(domain)
+			print("  \_",colored(domain,'cyan'), shannon_entropy(domain))
 
-	print "[*]-Calculate Levenshtein Ratio"
+	print("[*]-Calculate Levenshtein Ratio")
 	for domain in DOMAINS:
 		ext_domain=tldextract.extract(domain)
 		LevWord1=ext_domain.domain
 		LevWord2=args.search
 		if Levenshtein.ratio(LevWord1, LevWord2) > 0.8:
-			print "  \_", colored(LevWord1, 'cyan'), "vs",colored(LevWord2,'cyan'), colored(Levenshtein.ratio(LevWord1, LevWord2),'red')
+			print("  \_", colored(LevWord1, 'cyan'), "vs",colored(LevWord2,'cyan'), colored(Levenshtein.ratio(LevWord1, LevWord2),'red'))
 		if Levenshtein.ratio(LevWord1, LevWord2) < 0.8 and Levenshtein.ratio(LevWord1, LevWord2) > 0.4:
-			print "  \_", colored(LevWord1, 'cyan'), "vs",colored(LevWord2,'cyan'), colored(Levenshtein.ratio(LevWord1, LevWord2),'yellow')
+			print("  \_", colored(LevWord1, 'cyan'), "vs",colored(LevWord2,'cyan'), colored(Levenshtein.ratio(LevWord1, LevWord2),'yellow'))
 		if Levenshtein.ratio(LevWord1, LevWord2) < 0.4:
-			print "  \_", colored(LevWord1, 'cyan'), "vs", colored(LevWord2,'cyan'), colored(Levenshtein.ratio(LevWord1, LevWord2),'green')
+			print("  \_", colored(LevWord1, 'cyan'), "vs", colored(LevWord2,'cyan'), colored(Levenshtein.ratio(LevWord1, LevWord2),'green'))
 
-	print (time.time() - start)
+	print((time.time() - start))
