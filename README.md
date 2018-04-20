@@ -150,7 +150,7 @@ optional arguments:
   \_ paypal-required-action.com
     \_ Blocked
   \_ paypal-resolvedbillingstatement.com
-    \_ Not Blocled
+    \_ Not Blocked
 [*]-Calculate Shannon Entropy Information
   \_ paypal-required-action.com 3.97909789113
   \_ paypal-resolvedbillingstatement.com 4.05757515968
