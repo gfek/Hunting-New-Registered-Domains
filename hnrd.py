@@ -396,7 +396,7 @@ def get_quad9_results():
 					if QUAD9NXDOMAIN is not None:
 						print("    \_", colored(QUAD9NXDOMAIN,'red'))
 					else:
-						print("    \_", colored("Not Blocled",'yellow'))
+						print("    \_", colored("Not Blocked",'yellow'))
 				except Exception as exc:
 					print(('%r generated an exception: %s' % (quad9_domain, exc)))
 	except ValueError:
