@@ -18,6 +18,7 @@ import warnings
 import json
 import Levenshtein
 import tldextract
+import base64
 
 
 try:
@@ -426,7 +427,8 @@ def shannon_entropy(domain):
 
 def donwnload_nrd(d):
 	if not os.path.isfile(d+".zip"):
-		nrd_zip = 'https://whoisds.com//whois-database/newly-registered-domains/'+d+'.zip/nrd'
+		b64 = base64.b64encode((d+".zip").encode('ascii'))
+		nrd_zip = 'https://whoisds.com//whois-database/newly-registered-domains/{}/nrd'.format(b64.decode('ascii'))
 		try:
 			resp = requests.get(nrd_zip,stream=True)
 
