@@ -115,6 +115,7 @@ def whois_domain(domain_name):
     import time
     import datetime
     RES = {}
+    emails = "-"
 
     try:
         w_res = whois.whois(domain_name)
@@ -130,12 +131,14 @@ def whois_domain(domain_name):
             updated_date = w_res.updated_date
             expiration_date = w_res.expiration_date
 
+        if isinstance(w_res.emails, list):
+            emails = ", ".join(w_res.emails)
         current_date = datetime.datetime.now()
 
         RES.update({
             "creation_date": creation_date,
             "creation_date_diff": diff_dates(current_date, creation_date),
-            "emails": w_res.emails,
+            "emails": emails,
             "name": w_res.name,
             "registrar": w_res.registrar,
             "updated_date": updated_date,
@@ -149,6 +152,7 @@ def whois_domain(domain_name):
         print(colored("No match for domain: {}.".format(domain_name), 'red'))
     except AttributeError:
         pass
+
     return RES
 
 
@@ -211,49 +215,29 @@ def get_WHOIS_results():
                                 email = whois_data.get('emails')
                             if 'registrar' in k:
                                 reg = whois_data.get('registrar')
+                        print(
+                            r"  \_",
+                            colored(dwhois, 'cyan'),
+                            "\n" + r"    \_ Created Date",
+                            colored(cd, 'yellow'),
+                            "\n" + r"    \_ Updated Date",
+                            colored(ud, 'yellow'),
+                            "\n" + r"    \_ Expiration Date",
+                            colored(ed, 'yellow'),
+                            "\n" + r"    \_ DateDiff",
+                            colored(cdd, 'yellow'),
+                            "\n" + r"    \_ Name",
+                            colored(name, 'yellow'),
+                            "\n" + r"    \_ Email",
+                            colored(email, 'yellow'),
+                            "\n" + r"    \_ Registrar",
+                            colored(reg, 'yellow'))
 
-                        if isinstance(email, list):
-                            print(
-                                r"  \_",
-                                colored(dwhois, 'cyan'),
-                                "\n" + r"    \_ Created Date",
-                                colored(cd, 'yellow'),
-                                "\n" + r"    \_ Updated Date",
-                                colored(ud, 'yellow'),
-                                "\n" + r"    \_ Expiration Date",
-                                colored(ed, 'yellow'),
-                                "\n" + r"    \_ DateDiff",
-                                colored(cdd, 'yellow'),
-                                "\n" + r"    \_ Name",
-                                colored(name, 'yellow'),
-                                "\n" + r"    \_ Email",
-                                colored(','.join(email), 'yellow'),
-                                "\n" + r"    \_ Registrar",
-                                colored(reg, 'yellow'))
-
-                            if isinstance(name, list):
-                                for n in name:
-                                    NAMES.append(n)
-                            else:
-                                NAMES.append(name)
+                        if isinstance(name, list):
+                            for n in name:
+                                NAMES.append(n)
                         else:
-                            print(
-                                r"  \_ ",
-                                colored(dwhois, 'cyan'),
-                                "\n" + r"    \_ Created Date",
-                                colored(cd, 'yellow'),
-                                "\n" + r"    \_ Updated Date",
-                                colored(ud, 'yellow'),
-                                "\n" + r"    \_ Expiration Date",
-                                colored(ed, 'yellow'),
-                                "\n" + r"    \_ DateDiff",
-                                colored(cdd, 'yellow'),
-                                "\n" + r"    \_ Name",
-                                colored(name, 'yellow'),
-                                "\n" + r"    \_ Email",
-                                colored(email, 'yellow'),
-                                "\n" + r"    \_ Registrar",
-                                colored(reg, 'yellow'))
+                            NAMES.append(name)
 
                 except Exception as exc:
                     print(('%r generated an exception: %s' % (dwhois, exc)))
