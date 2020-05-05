@@ -1,7 +1,7 @@
 # Hunting-Newly-Registered-Domains
 Hunting Newly Registered Domains
 
-The `hnrd.py` is a python utility for finding and analysing potential phishing domains used in phishing campaigns targeting your customers. This utility is written in python (2.7 and 3) and is based on the analysis of the features below by consuming a free daily list provided by the [Whoisds](https://whoisds.com/newly-registered-domains) site. 
+HNRD is a python utility for finding and analysing potential phishing domains used in phishing campaigns targeting your customers. This utility is written in python (2.7 and 3) and is based on the analysis of the features below by consuming a free daily list provided by the [Whoisds](https://whoisds.com/newly-registered-domains) site. 
 
 ## Features
 
@@ -42,10 +42,18 @@ The `hnrd.py` is a python utility for finding and analysing potential phishing d
 * urllib3==1.22
 * webencodings==0.5.1
 
+## Installation
+
+```
+$ git clone https://github.com/gfek/Hunting-New-Registered-Domains
+$ cd Hunting-New-Registered-Domains
+$ pip install .
+```
+
 ## Help
 
 ```
-usage: hnrd.py [-h] -f DATE -s SEARCH [-v]
+usage: hunt-domains.py [-h] -f DATE -s SEARCH [-v]
 
 hunting newly registered domains
 
@@ -58,7 +66,7 @@ optional arguments:
 
 ### Example
 
-`python hnrd.py -f 2018-03-30 -s paypal`
+`python hunt-domains.py -f 2018-03-30 -s paypal`
 
 ```
 [*]-Retrieving DNS Record(s) Information
@@ -158,6 +166,20 @@ optional arguments:
   \_ paypal-required-action vs paypal 0.428571428571
   \_ paypal-resolvedbillingstatement vs paypal 0.324324324324
 ```
+
+## Using it as a library
+
+E.g:
+
+```python
+import hnrd.utils
+
+hnrd.utils.shannon_entropy("google.com")
+
+```
+
+See `hnrd/utils.py` for details.
+
 ## Similar projects
 
 * [**dnstiwst**](https://github.com/elceef/dnstwist)
