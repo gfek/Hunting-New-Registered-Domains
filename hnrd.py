@@ -344,10 +344,11 @@ def crt(domain):
         'Accept': 'application/json'}
     response = requests.get(
         "https://crt.sh/?", params=parameters, headers=headers)
+    assert(response.status_code == "200"), "Too many connections."
     content = response.content.decode('utf-8')
-    data = json.loads("[{}]".format(content.replace('}{', '},{')))
-    return data
+    data = json.loads("{}".format(content.replace('}{', '},{')))
 
+    return data
 
 def getcrt():
     w = len(NAMES)
@@ -362,7 +363,6 @@ def getcrt():
                     crtdata = future.result()
                     if len(crtdata) > 0:
                         for crtd in crtdata:
-                            print(len(crtdata))
                             for k, v in crtd.items():
                                 print(r"    \_", k, colored(v, 'yellow'))
                     else:
