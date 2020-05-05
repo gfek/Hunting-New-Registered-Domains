@@ -1,25 +1,25 @@
 from __future__ import print_function
 
+import argparse
+import base64
 import concurrent.futures
-import dns.resolver
-import whois
-import time
-import zipfile
+import json
 import os
 import os.path
 import re
-import argparse
 import sys
+import time
+import warnings
+import zipfile
+
+import dns.resolver
+import Levenshtein
 import requests
+import tldextract
+import whois
+from bs4 import BeautifulSoup
 from colorama import init
 from termcolor import colored
-from bs4 import BeautifulSoup
-import warnings
-import json
-import Levenshtein
-import tldextract
-import base64
-
 
 try:
     from sets import Set as set
