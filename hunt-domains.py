@@ -1,25 +1,16 @@
 from __future__ import print_function
 
 import argparse
-import base64
 import concurrent.futures
-import json
-import os
-import os.path
 import re
 import sys
 import time
 import warnings
-import zipfile
 
-import dns.resolver
-import Levenshtein
-import requests
-import tldextract
-import whois
-from bs4 import BeautifulSoup
 from colorama import init
 from termcolor import colored
+
+import hnrd.utils
 
 try:
     from sets import Set as set
@@ -31,54 +22,6 @@ init()
 warnings.filterwarnings("ignore")
 
 
-def dns_records(domain):
-
-    RES = {}
-    MX = []
-    NS = []
-    A = []
-    AAAA = []
-    SOA = []
-
-    resolver = dns.resolver.Resolver()
-    resolver.timeout = 1
-    resolver.lifetime = 1
-
-    rrtypes = ['A', 'MX', 'NS', 'AAAA', 'SOA']
-    for r in rrtypes:
-        try:
-            Aanswer = resolver.query(domain, r)
-            for answer in Aanswer:
-                if r == 'A':
-                    A.append(answer.address)
-                    RES.update({r: A})
-                if r == 'MX':
-                    MX.append(answer.exchange.to_text()[:-1])
-                    RES.update({r: MX})
-                if r == 'NS':
-                    NS.append(answer.target.to_text()[:-1])
-                    RES.update({r: NS})
-                if r == 'AAAA':
-                    AAAA.append(answer.address)
-                    RES.update({r: AAAA})
-                if r == 'SOA':
-                    SOA.append(answer.mname.to_text()[:-1])
-                    RES.update({r: SOA})
-        except dns.resolver.NXDOMAIN:
-            pass
-        except dns.resolver.NoAnswer:
-            pass
-        except dns.name.EmptyLabel:
-            pass
-        except dns.resolver.NoNameservers:
-            pass
-        except dns.resolver.Timeout:
-            pass
-        except dns.exception.DNSException:
-            pass
-    return RES
-
-
 def get_dns_record_results():
     global IPs
     try:
@@ -86,7 +29,8 @@ def get_dns_record_results():
                 max_workers=len(DOMAINS)) as executor:
             future_to_domain = {
                     executor.submit(
-                        dns_records, domain): domain for domain in DOMAINS
+                            hnrd.utils.dns_records, domain
+                        ): domain for domain in DOMAINS
                 }
             for future in concurrent.futures.as_completed(future_to_domain):
                 dom = future_to_domain[future]
@@ -107,70 +51,12 @@ def get_dns_record_results():
     return IPs
 
 
-def diff_dates(date1, date2):
-    return abs((date2-date1).days)
-
-
-def whois_domain(domain_name):
-    import time
-    import datetime
-    RES = {}
-    emails = "-"
-
-    try:
-        w_res = whois.whois(domain_name)
-
-        if (isinstance(w_res.creation_date, list)
-                or isinstance(w_res.updated_date, list)
-                or isinstance(w_res.expiration_date, list)):
-            creation_date = w_res.creation_date[0]
-            updated_date = w_res.updated_date[0]
-            expiration_date = w_res.expiration_date[0]
-        else:
-            creation_date = w_res.creation_date
-            updated_date = w_res.updated_date
-            expiration_date = w_res.expiration_date
-
-        if isinstance(w_res.emails, list):
-            emails = ", ".join(w_res.emails)
-        current_date = datetime.datetime.now()
-
-        RES.update({
-            "creation_date": creation_date,
-            "creation_date_diff": diff_dates(current_date, creation_date),
-            "emails": emails,
-            "name": w_res.name,
-            "registrar": w_res.registrar,
-            "updated_date": updated_date,
-            "expiration_date": expiration_date
-        })
-
-        time.sleep(2)
-    except TypeError:
-        pass
-    except whois.parser.PywhoisError:
-        print(colored("No match for domain: {}.".format(domain_name), 'red'))
-    except AttributeError:
-        pass
-
-    return RES
-
-
-def ip2cidr(ip):
-    from ipwhois.net import Net
-    from ipwhois.asn import IPASN
-
-    net = Net(ip)
-    obj = IPASN(net)
-    results = obj.lookup()
-    return results
-
-
 def get_ip2cidr():
     w = len(IPs)
     try:
         with concurrent.futures.ThreadPoolExecutor(max_workers=w) as executor:
-            future_to_ip2asn = {executor.submit(ip2cidr, ip): ip for ip in IPs}
+            future_to_ip2asn = {
+                executor.submit(hnrd.utils.ip2cidr, ip): ip for ip in IPs}
             for future in concurrent.futures.as_completed(future_to_ip2asn):
                 ipaddress = future_to_ip2asn[future]
                 print(r"  \_", colored(ipaddress, 'cyan'))
@@ -191,7 +77,8 @@ def get_whois_results():
         with concurrent.futures.ThreadPoolExecutor(max_workers=w) as executor:
             future_to_whois_domain = {
                 executor.submit(
-                    whois_domain, domain): domain for domain in DOMAINS
+                        hnrd.utils.whois_domain, domain
+                    ): domain for domain in DOMAINS
             }
 
             for future in concurrent.futures.as_completed(
@@ -246,18 +133,6 @@ def get_whois_results():
     return NAMES
 
 
-def email_domain_bigdata(name):
-    url = "http://domainbigdata.com/name/{}".format(name)
-    session = requests.Session()
-    session.headers['User-Agent'] = r'Mozilla/5.0 ' \
-        + '(Macintosh; Intel Mac OS X 10.10; rv:42.0) ' \
-        + 'Gecko/20100101 Firefox/42.0'
-    email_query = session.get(url)
-    email_soup = BeautifulSoup(email_query.text, "html5lib")
-    emailbigdata = email_soup.find("table", {"class": "t1"})
-    return emailbigdata
-
-
 def get_email_domain_bigdata():
     CreatedDomains = []
     w = len(NAMES)
@@ -265,7 +140,8 @@ def get_email_domain_bigdata():
         with concurrent.futures.ThreadPoolExecutor(max_workers=w) as executor:
             future_to_rev_whois_domain = {
                 executor.submit(
-                    email_domain_bigdata, name): name for name in set(NAMES)}
+                    hnrd.utils.email_domain_bigdata, name):
+                        name for name in set(NAMES)}
 
             for future in concurrent.futures.as_completed(
                     future_to_rev_whois_domain):
@@ -303,27 +179,13 @@ def get_email_domain_bigdata():
         pass
 
 
-def crt(domain):
-    parameters = {'q': '%.{}'.format(domain), 'output': 'json'}
-    headers = {
-        'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.10; rv:52.0)'
-        + ' Gecko/20100101 Firefox/52.0',
-        'Accept': 'application/json'}
-    response = requests.get(
-        "https://crt.sh/?", params=parameters, headers=headers)
-    assert(response.status_code == "200"), "Too many connections."
-    content = response.content.decode('utf-8')
-    data = json.loads("{}".format(content.replace('}{', '},{')))
-
-    return data
-
-
 def get_crt():
     w = len(NAMES)
     try:
         with concurrent.futures.ThreadPoolExecutor(max_workers=w) as executor:
             future_to_crt = {
-                executor.submit(crt, domain): domain for domain in DOMAINS}
+                executor.submit(hnrd.utils.crt, domain):
+                    domain for domain in DOMAINS}
             for future in concurrent.futures.as_completed(future_to_crt):
                 d = future_to_crt[future]
                 print(r"  \_", colored(d, 'cyan'))
@@ -341,27 +203,14 @@ def get_crt():
         pass
 
 
-def vt_domain_report(domain):
-    parameters = {
-        'domain': domain, 'apikey': 'f76bdbc3755b5bafd4a18436bebf6a47d0aae6'
-        + 'd2b4284f118077aa0dbdbd76a4'}
-    headers = {'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.10;'
-               + ' rv:52.0) Gecko/20100101 Firefox/52.0'}
-    response = requests.get(
-        'https://www.virustotal.com/vtapi/v2/domain/report',
-        params=parameters,
-        headers=headers)
-    response_dict = response.json()
-    return response_dict
-
-
 def get_vt_domain_report():
     w = len(DOMAINS)
     try:
         with concurrent.futures.ThreadPoolExecutor(max_workers=w) as executor:
             future_to_vt = {
                 executor.submit(
-                    vt_domain_report, domain): domain for domain in DOMAINS}
+                    hnrd.utils.vt_domain_report, domain):
+                        domain for domain in DOMAINS}
 
             for future in concurrent.futures.as_completed(future_to_vt):
                 d = future_to_vt[future]
@@ -472,34 +321,13 @@ def get_vt_domain_report():
         pass
 
 
-def quad9(domain):
-    resolver = dns.resolver.Resolver()
-    resolver.nameservers = ['9.9.9.9']
-    resolver.timeout = 1
-    resolver.lifetime = 1
-
-    try:
-        resolver.query(domain, 'A')
-    except dns.resolver.NXDOMAIN:
-        return "Blocked"
-    except dns.resolver.NoAnswer:
-        pass
-    except dns.name.EmptyLabel:
-        pass
-    except dns.resolver.NoNameservers:
-        pass
-    except dns.resolver.Timeout:
-        pass
-    except dns.exception.DNSException:
-        pass
-
-
 def get_quad9_results():
     w = len(DOMAINS)
     try:
         with concurrent.futures.ThreadPoolExecutor(max_workers=w) as executor:
             future_to_quad9 = {
-                executor.submit(quad9, domain): domain for domain in DOMAINS}
+                executor.submit(
+                    hnrd.utils.quad9, domain): domain for domain in DOMAINS}
             for future in concurrent.futures.as_completed(future_to_quad9):
                 quad9_domain = future_to_quad9[future]
                 print(r"  \_", colored(quad9_domain, 'cyan'))
@@ -515,85 +343,6 @@ def get_quad9_results():
                     )
     except ValueError:
         pass
-
-
-def shannon_entropy(domain):
-    import math
-
-    stList = list(domain)
-    alphabet = list(set(domain))  # list of symbols in the string
-    freqList = []
-
-    for symbol in alphabet:
-        ctr = 0
-        for sym in stList:
-            if sym == symbol:
-                ctr += 1
-        freqList.append(float(ctr) / len(stList))
-
-    # Shannon entropy
-    ent = 0.0
-    for freq in freqList:
-        ent = ent + freq * math.log(freq, 2)
-    ent = -ent
-    return ent
-
-
-def donwnload_nrd(d):
-    if not os.path.isfile(d+".zip"):
-        b64 = base64.b64encode((d+".zip").encode('ascii'))
-        nrd_zip = 'https://whoisds.com'\
-            + '/whois-database/newly-registered-domains/{}/nrd'.format(
-                b64.decode('ascii'))
-        try:
-            resp = requests.get(nrd_zip, stream=True)
-
-            print("Downloading File {} - Size {}...".format(
-                d+'.zip', resp.headers['Content-length']))
-
-            if resp.headers['Content-length']:
-                with open(d+".zip", 'wb') as f:
-                    for data in resp.iter_content(chunk_size=1024):
-                        f.write(data)
-                try:
-                    zip = zipfile.ZipFile(d+".zip")
-                    zip.extractall()
-                except Exception:
-                    print("File is not a zip file.")
-                    sys.exit()
-        except Exception:
-            print("File {}.zip does not exist on the remore server.".format(d))
-            sys.exit()
-
-
-def bitsquatting(search_word):
-    out = []
-    masks = [1, 2, 4, 8, 16, 32, 64, 128]
-
-    for i in range(0, len(search_word)):
-        c = search_word[i]
-        for j in range(0, len(masks)):
-            b = chr(ord(c) ^ masks[j])
-            o = ord(b)
-            if (o >= 48 and o <= 57) or (o >= 97 and o <= 122) or o == 45:
-                out.append(search_word[:i] + b + search_word[i+1:])
-    return out
-
-
-def hyphenation(search_word):
-    out = []
-    for i in range(1, len(search_word)):
-        out.append(search_word[:i] + '-' + search_word[i:])
-    return out
-
-
-def subdomain(search_word):
-    out = []
-    for i in range(1, len(search_word)):
-        if (search_word[i] not in ['-', '.']
-                and search_word[i-1] not in ['-', '.']):
-            out.append(search_word[:i] + '.' + search_word[i:])
-    return out
 
 
 if __name__ == '__main__':
@@ -624,7 +373,7 @@ if __name__ == '__main__':
     regexd = re.compile(r'[\d]{4}-[\d]{2}-[\d]{2}$')
     matchObj = re.match(regexd, args.date)
     if matchObj:
-        donwnload_nrd(args.date)
+        hnrd.utils.donwnload_nrd(args.date)
     else:
         print("Not a correct input (example: 2010-10-10)")
         sys.exit()
@@ -643,9 +392,9 @@ if __name__ == '__main__':
             print("No such file or directory domain-names.txt found")
             sys.exit()
 
-    bitsquatting_search = bitsquatting(args.search)
-    hyphenation_search = hyphenation(args.search)
-    subdomain_search = subdomain(args.search)
+    bitsquatting_search = hnrd.utils.bitsquatting(args.search)
+    hyphenation_search = hnrd.utils.hyphenation(args.search)
+    subdomain_search = hnrd.utils.subdomain(args.search)
     search_all = bitsquatting_search+hyphenation_search+subdomain_search
     search_all.append(args.search)
 
@@ -682,47 +431,49 @@ if __name__ == '__main__':
 
     print("[*]-Calculate Shannon Entropy Information")
     for domain in DOMAINS:
-        if shannon_entropy(domain) > 4:
+        if hnrd.utils.shannon_entropy(domain) > 4:
             print(
                 r"  \_",
                 colored(domain, 'cyan'),
                 colored(
-                    shannon_entropy(domain), 'red')
+                    hnrd.utils.shannon_entropy(domain), 'red')
             )
-        elif shannon_entropy(domain) > 3.5 and shannon_entropy(domain) < 4:
+        elif (hnrd.utils.shannon_entropy(domain) > 3.5
+                and hnrd.utils.shannon_entropy(domain) < 4):
             print(
                 r"  \_",
                 colored(domain, 'cyan'),
-                colored(shannon_entropy(domain), 'yellow')
+                colored(hnrd.utils.shannon_entropy(domain), 'yellow')
             )
         else:
-            print(r"  \_", colored(domain, 'cyan'), shannon_entropy(domain))
+            print(
+                r"  \_",
+                colored(domain, 'cyan'),
+                hnrd.utils.shannon_entropy(domain))
 
     print("[*]-Calculate Levenshtein Ratio")
     for domain in DOMAINS:
-        ext_domain = tldextract.extract(domain)
-        LevWord1 = ext_domain.domain
-        LevWord2 = args.search
-        if Levenshtein.ratio(LevWord1, LevWord2) > 0.8:
+
+        r = hnrd.utils.levenshtein_ratio(domain, args.search)
+        if r["ratio"] > 0.8:
             print(
                 r"  \_",
-                colored(LevWord1, 'cyan'),
+                colored(r["LevWord1"], 'cyan'),
                 "vs",
-                colored(LevWord2, 'cyan'),
-                colored(Levenshtein.ratio(LevWord1, LevWord2), 'red'))
-        if (Levenshtein.ratio(LevWord1, LevWord2) < 0.8
-                and Levenshtein.ratio(LevWord1, LevWord2) > 0.4):
+                colored(r["LevWord2"], 'cyan'),
+                colored(r["ratio"], 'red'))
+        if (r["ratio"] < 0.8 and r["ratio"] > 0.4):
             print(
                 r"  \_",
-                colored(LevWord1, 'cyan'),
+                colored(r["LevWord1"], 'cyan'),
                 "vs",
-                colored(LevWord2, 'cyan'),
-                colored(Levenshtein.ratio(LevWord1, LevWord2), 'yellow'))
-        if Levenshtein.ratio(LevWord1, LevWord2) < 0.4:
+                colored(r["LevWord2"], 'cyan'),
+                colored(r["ratio"], 'yellow'))
+        if r["ratio"] < 0.4:
             print(
                 r"  \_",
-                colored(LevWord1, 'cyan'),
-                "vs", colored(LevWord2, 'cyan'),
-                colored(Levenshtein.ratio(LevWord1, LevWord2), 'green'))
+                colored(r["LevWord1"], 'cyan'),
+                "vs", colored(r["LevWord2"], 'cyan'),
+                colored(r["ratio"], 'green'))
 
     print((time.time() - start))
