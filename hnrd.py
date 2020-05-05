@@ -118,46 +118,29 @@ def whois_domain(domain_name):
 
     try:
         w_res = whois.whois(domain_name)
-        name = w_res.name
-        creation_date = w_res.creation_date
-        emails = w_res.emails
-        registrar = w_res.registrar
-        updated_date = w_res.updated_date
-        expiration_date = w_res.expiration_date
 
-        if (isinstance(creation_date, datetime.datetime)
-                or isinstance(expiration_date, datetime.datetime)
-                or isinstance(updated_date, datetime.datetime)):
-
-            current_date = datetime.datetime.now()
-            res = diff_dates(current_date, creation_date)
-            RES.update({
-                "creation_date": creation_date,
-                "creation_date_diff": res,
-                "emails": emails,
-                "name": name,
-                "registrar": registrar,
-                "updated_date": updated_date,
-                "expiration_date": expiration_date
-            })
-        elif (isinstance(creation_date, list)
-                or isinstance(expiration_date, list)
-                or isinstance(updated_date, list)):
-
+        if (isinstance(w_res.creation_date, list)
+                or isinstance(w_res.updated_date, list)
+                or isinstance(w_res.expiration_date, list)):
             creation_date = w_res.creation_date[0]
             updated_date = w_res.updated_date[0]
             expiration_date = w_res.expiration_date[0]
-            current_date = datetime.datetime.now()
-            res = diff_dates(current_date, creation_date)
+        else:
+            creation_date = w_res.creation_date
+            updated_date = w_res.updated_date
+            expiration_date = w_res.expiration_date
 
-            RES.update({
-                "creation_date": creation_date,
-                "creation_date_diff": res,
-                "emails": emails,
-                "name": name,
-                "registrar": registrar,
-                "updated_date": updated_date,
-                "expiration_date": expiration_date})
+        current_date = datetime.datetime.now()
+
+        RES.update({
+            "creation_date": creation_date,
+            "creation_date_diff": diff_dates(current_date, creation_date),
+            "emails": w_res.emails,
+            "name": w_res.name,
+            "registrar": w_res.registrar,
+            "updated_date": updated_date,
+            "expiration_date": expiration_date
+        })
 
         time.sleep(2)
     except TypeError:
@@ -349,6 +332,7 @@ def crt(domain):
     data = json.loads("{}".format(content.replace('}{', '},{')))
 
     return data
+
 
 def getcrt():
     w = len(NAMES)
