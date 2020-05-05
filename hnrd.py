@@ -31,7 +31,7 @@ init()
 warnings.filterwarnings("ignore")
 
 
-def DNS_Records(domain):
+def dns_records(domain):
 
     RES = {}
     MX = []
@@ -79,14 +79,14 @@ def DNS_Records(domain):
     return RES
 
 
-def get_DNS_record_results():
+def get_dns_record_results():
     global IPs
     try:
         with concurrent.futures.ThreadPoolExecutor(
                 max_workers=len(DOMAINS)) as executor:
             future_to_domain = {
                     executor.submit(
-                        DNS_Records, domain): domain for domain in DOMAINS
+                        dns_records, domain): domain for domain in DOMAINS
                 }
             for future in concurrent.futures.as_completed(future_to_domain):
                 dom = future_to_domain[future]
@@ -156,7 +156,7 @@ def whois_domain(domain_name):
     return RES
 
 
-def IP2CIDR(ip):
+def ip2cidr(ip):
     from ipwhois.net import Net
     from ipwhois.asn import IPASN
 
@@ -166,11 +166,11 @@ def IP2CIDR(ip):
     return results
 
 
-def get_IP2CIDR():
+def get_ip2cidr():
     w = len(IPs)
     try:
         with concurrent.futures.ThreadPoolExecutor(max_workers=w) as executor:
-            future_to_ip2asn = {executor.submit(IP2CIDR, ip): ip for ip in IPs}
+            future_to_ip2asn = {executor.submit(ip2cidr, ip): ip for ip in IPs}
             for future in concurrent.futures.as_completed(future_to_ip2asn):
                 ipaddress = future_to_ip2asn[future]
                 print(r"  \_", colored(ipaddress, 'cyan'))
@@ -184,7 +184,7 @@ def get_IP2CIDR():
         pass
 
 
-def get_WHOIS_results():
+def get_whois_results():
     global NAMES
     w = len(DOMAINS)
     try:
@@ -246,7 +246,7 @@ def get_WHOIS_results():
     return NAMES
 
 
-def EmailDomainBigData(name):
+def email_domain_bigdata(name):
     url = "http://domainbigdata.com/name/{}".format(name)
     session = requests.Session()
     session.headers['User-Agent'] = r'Mozilla/5.0 ' \
@@ -258,14 +258,14 @@ def EmailDomainBigData(name):
     return emailbigdata
 
 
-def get_EmailDomainBigData():
+def get_email_domain_bigdata():
     CreatedDomains = []
     w = len(NAMES)
     try:
         with concurrent.futures.ThreadPoolExecutor(max_workers=w) as executor:
             future_to_rev_whois_domain = {
                 executor.submit(
-                    EmailDomainBigData, name): name for name in set(NAMES)}
+                    email_domain_bigdata, name): name for name in set(NAMES)}
 
             for future in concurrent.futures.as_completed(
                     future_to_rev_whois_domain):
@@ -318,7 +318,7 @@ def crt(domain):
     return data
 
 
-def getcrt():
+def get_crt():
     w = len(NAMES)
     try:
         with concurrent.futures.ThreadPoolExecutor(max_workers=w) as executor:
@@ -341,7 +341,7 @@ def getcrt():
         pass
 
 
-def VTDomainReport(domain):
+def vt_domain_report(domain):
     parameters = {
         'domain': domain, 'apikey': 'f76bdbc3755b5bafd4a18436bebf6a47d0aae6'
         + 'd2b4284f118077aa0dbdbd76a4'}
@@ -355,13 +355,13 @@ def VTDomainReport(domain):
     return response_dict
 
 
-def getVTDomainReport():
+def get_vt_domain_report():
     w = len(DOMAINS)
     try:
         with concurrent.futures.ThreadPoolExecutor(max_workers=w) as executor:
             future_to_vt = {
                 executor.submit(
-                    VTDomainReport, domain): domain for domain in DOMAINS}
+                    vt_domain_report, domain): domain for domain in DOMAINS}
 
             for future in concurrent.futures.as_completed(future_to_vt):
                 d = future_to_vt[future]
@@ -658,24 +658,24 @@ if __name__ == '__main__':
     start = time.time()
 
     print("[*]-Retrieving DNS Record(s) Information")
-    get_DNS_record_results()
+    get_dns_record_results()
 
     print("[*]-Retrieving IP2ASN Information")
-    get_IP2CIDR()
+    get_ip2cidr()
 
     print("[*]-Retrieving WHOIS Information")
-    get_WHOIS_results()
+    get_whois_results()
 
     print(
         "[*]-Retrieving Reverse WHOIS (by Name) Information "
         + "[Source https://domainbigdata.com]")
-    get_EmailDomainBigData()
+    get_email_domain_bigdata()
 
     print("[*]-Retrieving Certficates [Source https://crt.sh]")
-    getcrt()
+    get_crt()
 
     print("[*]-Retrieving VirusTotal Information")
-    getVTDomainReport()
+    get_vt_domain_report()
 
     print("[*]-Check domains against QUAD9 service")
     get_quad9_results()
