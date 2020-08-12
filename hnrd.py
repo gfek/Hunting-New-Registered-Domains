@@ -428,7 +428,7 @@ def shannon_entropy(domain):
 def donwnload_nrd(d):
 	if not os.path.isfile(d+".zip"):
 		b64 = base64.b64encode((d+".zip").encode('ascii'))
-		nrd_zip = 'https://whoisds.com//whois-database/newly-registered-domains/{}/nrd'.format(b64.decode('ascii'))
+		nrd_zip = 'https://www.whoisds.com//whois-database/newly-registered-domains/{}/nrd'.format(b64.decode('ascii'))
 		try:
 			resp = requests.get(nrd_zip,stream=True)
 
