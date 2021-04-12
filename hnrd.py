@@ -15,6 +15,7 @@ import re
 from colorama import init
 from termcolor import colored
 from bs4 import BeautifulSoup
+import datetime
 import warnings
 import json
 import Levenshtein
@@ -477,7 +478,7 @@ def shannon_entropy(domain):
     return ent
 
 
-def donwnload_nrd(d):
+def download_nrd(d):
     if not os.path.isfile(d+".zip"):
         b64 = base64.b64encode((d+".zip").encode('ascii'))
         nrd_zip = 'https://www.whoisds.com//whois-database/newly-registered-domains/{}/nrd'.format(
@@ -500,6 +501,28 @@ def donwnload_nrd(d):
         except:
             print("File {}.zip does not exist on the remote server.".format(d))
             sys.exit()
+
+
+def download_nrds_from_to(date_from, date_to):
+    d = '{}-{:02}-{:02}'
+    date_i = date_from
+    while date_i <= date_to:
+        date_str = d.format(date_i.year, date_i.month, date_i.day)
+        download_nrd(date_str)
+        try:
+            f = open(date_str + '.txt', 'r')
+        except:
+            try:
+                f = open('domain-names.txt', 'r')
+            except:
+                'Fatal error: no domain-names found'
+                sys.exit()
+        with open('domain-names.tmp', 'a') as fout:
+            for row in f:
+                fout.write(row)
+        date_i = date_i + datetime.timedelta(days=1)
+
+    os.rename('domain-names.tmp', 'domain-names.txt')
 
 
 def bitsquatting(search_word):
@@ -539,15 +562,38 @@ if __name__ == '__main__':
         prog="hnrd.py", description='hunting newly registered domains')
     parser.add_argument("-f", action="store", dest='date',
                         help="date [format: year-month-date]", required=True)
+    parser.add_argument("-t", action="store", dest='date_end',
+                        help="Ending date (get domain names since date to ending date) [format: year-month-date or \"yesterday\"]", required=False, default=None)
     parser.add_argument("-s", action="store", dest='search',
                         help="search a keyword", required=True)
     parser.add_argument("-v", action="version", version="%(prog)s v1.0")
     args = parser.parse_args()
 
-    regexd = re.compile('[\d]{4}-[\d]{2}-[\d]{2}$')
+    regexd = re.compile('([\d]{4})-([\d]{1,2})-([\d]{1,2})$')
     matchObj = re.match(regexd, args.date)
     if matchObj:
-        donwnload_nrd(args.date)
+        if args.date_end is None:
+            download_nrd(args.date)
+        else:
+            date_start = datetime.date(
+                int(matchObj[1]), int(matchObj[2]), int(matchObj[3]))
+            if args.date_end.lower() == 'yesterday':
+                date_end = datetime.date.today() - datetime.timedelta(days=1)
+            else:
+                matchObj = re.match(regexd, args.date_end)
+                if matchObj:
+                    date_end = datetime.date(
+                        int(matchObj[1]), int(matchObj[2]), int(matchObj[3]))
+
+                else:
+                    print("Not a correct input (example: 2010-10-10)")
+                    sys.exit()
+            if date_end < date_start:
+                print("Ending date is earlier than starting date.")
+                sys.exit()
+            else:
+                download_nrds_from_to(date_start, date_end)
+
     else:
         print("Not a correct input (example: 2010-10-10)")
         sys.exit()
@@ -555,7 +601,7 @@ if __name__ == '__main__':
     try:
         f = open(args.date + '.txt', 'r')
     except:
-        print("No such file or directory {}.zip found. Trying domain-names.txt.".format(args.date))
+        print("No such file or directory {}.txt found. Trying domain-names.txt.".format(args.date))
 
         try:
             f = open('domain-names.txt', 'r')
