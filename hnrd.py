@@ -302,7 +302,7 @@ def crt(domain):
     response = requests.get(
         "https://crt.sh/?", params=parameters, headers=headers)
     content = response.content.decode('utf-8')
-    data = json.loads("[{}]".format(content.replace('}{', '},{')))
+    data = json.loads("{}".format(content.replace('}{', '},{')))
     return data
 
 
