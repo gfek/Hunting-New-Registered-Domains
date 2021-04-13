@@ -533,14 +533,18 @@ def subdomain(search_word):
 
 if __name__ == '__main__':
     DOMAINS = []
+    DOMAINS_DICT = {}
     IPs = []
     NAMES = []
     parser = argparse.ArgumentParser(
         prog="hnrd.py", description='hunting newly registered domains')
     parser.add_argument("-f", action="store", dest='date',
                         help="date [format: year-month-date]", required=True)
-    parser.add_argument("-s", action="store", dest='search',
-                        help="search a keyword", required=True)
+    selection = parser.add_mutually_exclusive_group(required=True)
+    selection.add_argument("-s", action="store", dest='search',
+                           help="search a keyword", default=None)
+    selection.add_argument("-S", action="store", dest='search_file',
+                           help="File to read list of keywords from (One word per line).", default=None)
     parser.add_argument("-v", action="version", version="%(prog)s v1.0")
     args = parser.parse_args()
 
@@ -562,18 +566,38 @@ if __name__ == '__main__':
         except:
             print("No such file or directory domain-names.txt found")
             sys.exit()
-
-    bitsquatting_search = bitsquatting(args.search)
-    hyphenation_search = hyphenation(args.search)
-    subdomain_search = subdomain(args.search)
-    search_all = bitsquatting_search+hyphenation_search+subdomain_search
-    search_all.append(args.search)
+    if args.search is not None:
+        bitsquatting_search = bitsquatting(args.search)
+        hyphenation_search = hyphenation(args.search)
+        subdomain_search = subdomain(args.search)
+        search_all = {args.search: bitsquatting_search +
+                      hyphenation_search+subdomain_search}
+        search_all[args.search].append(args.search)
+    elif args.search_file is not None:
+        try:
+            with open(args.search_file, 'r') as flist:
+                search_words = [r.replace('\n', '') for r in flist.readlines()]
+        except:
+            print("No such list file: {}.".format(args.search_file))
+            sys.exit()
+        search_all = {}
+        for word in search_words:
+            bitsquatting_search = bitsquatting(word)
+            hyphenation_search = hyphenation(word)
+            subdomain_search = subdomain(word)
+            search_all[word] = bitsquatting_search + \
+                hyphenation_search+subdomain_search
+            search_all[word].append(word)
 
     for row in f:
-        for argssearch in search_all:
-            match = re.search(r"^"+argssearch, row)
-            if match:
-                DOMAINS.append(row.strip('\r\n'))
+        for key, argssearch_list in search_all.items():
+            for argssearch in argssearch_list:
+                if key not in DOMAINS_DICT:
+                    DOMAINS_DICT[key] = []
+                match = re.search(r"^"+argssearch, row)
+                if match:
+                    DOMAINS_DICT[key].append(row.strip('\r\n'))
+                    DOMAINS.append(row.strip('\r\n'))
 
     start = time.time()
 
@@ -610,18 +634,19 @@ if __name__ == '__main__':
             print("  \_", colored(domain, 'cyan'), shannon_entropy(domain))
 
     print("[*]-Calculate Levenshtein Ratio")
-    for domain in DOMAINS:
-        ext_domain = tldextract.extract(domain)
-        LevWord1 = ext_domain.domain
-        LevWord2 = args.search
-        if Levenshtein.ratio(LevWord1, LevWord2) > 0.8:
-            print("  \_", colored(LevWord1, 'cyan'), "vs", colored(
-                LevWord2, 'cyan'), colored(Levenshtein.ratio(LevWord1, LevWord2), 'red'))
-        if Levenshtein.ratio(LevWord1, LevWord2) < 0.8 and Levenshtein.ratio(LevWord1, LevWord2) > 0.4:
-            print("  \_", colored(LevWord1, 'cyan'), "vs", colored(
-                LevWord2, 'cyan'), colored(Levenshtein.ratio(LevWord1, LevWord2), 'yellow'))
-        if Levenshtein.ratio(LevWord1, LevWord2) < 0.4:
-            print("  \_", colored(LevWord1, 'cyan'), "vs", colored(
-                LevWord2, 'cyan'), colored(Levenshtein.ratio(LevWord1, LevWord2), 'green'))
+    for word, dlist in DOMAINS_DICT.items():
+        for domain in dlist:
+            ext_domain = tldextract.extract(domain)
+            LevWord1 = ext_domain.domain
+            LevWord2 = word
+            if Levenshtein.ratio(LevWord1, LevWord2) > 0.8:
+                print("  \_", colored(LevWord1, 'cyan'), "vs", colored(
+                    LevWord2, 'cyan'), colored(Levenshtein.ratio(LevWord1, LevWord2), 'red'))
+            if Levenshtein.ratio(LevWord1, LevWord2) < 0.8 and Levenshtein.ratio(LevWord1, LevWord2) > 0.4:
+                print("  \_", colored(LevWord1, 'cyan'), "vs", colored(
+                    LevWord2, 'cyan'), colored(Levenshtein.ratio(LevWord1, LevWord2), 'yellow'))
+            if Levenshtein.ratio(LevWord1, LevWord2) < 0.4:
+                print("  \_", colored(LevWord1, 'cyan'), "vs", colored(
+                    LevWord2, 'cyan'), colored(Levenshtein.ratio(LevWord1, LevWord2), 'green'))
 
     print((time.time() - start))
