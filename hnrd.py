@@ -561,8 +561,10 @@ if __name__ == '__main__':
     NAMES = []
     parser = argparse.ArgumentParser(
         prog="hnrd.py", description='hunting newly registered domains')
+    parser.add_argument('-d', action='store', dest='dfile',
+                        help='File containing new domain names', required=False)
     parser.add_argument("-f", action="store", dest='date',
-                        help="date [format: year-month-date]", required=True)
+                        help="date [format: year-month-date]", required=False)
 
     parser.add_argument("-t", action="store", dest='date_end',
                         help="Ending date (get domain names since date to ending date) [format: year-month-date or \"yesterday\"]", required=False, default=None)
@@ -577,43 +579,55 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     regexd = re.compile('([\d]{4})-([\d]{1,2})-([\d]{1,2})$')
-    matchObj = re.match(regexd, args.date)
-    if matchObj:
-        if args.date_end is None:
-            download_nrd(args.date)
-        else:
-            date_start = datetime.date(
-                int(matchObj[1]), int(matchObj[2]), int(matchObj[3]))
-            if args.date_end.lower() == 'yesterday':
-                date_end = datetime.date.today() - datetime.timedelta(days=1)
+    if args.date is not None:
+        matchObj = re.match(regexd, args.date)
+        if matchObj:
+            if args.date_end is None:
+                download_nrd(args.date)
             else:
-                matchObj = re.match(regexd, args.date_end)
-                if matchObj:
-                    date_end = datetime.date(
-                        int(matchObj[1]), int(matchObj[2]), int(matchObj[3]))
-
+                date_start = datetime.date(
+                    int(matchObj[1]), int(matchObj[2]), int(matchObj[3]))
+                if args.date_end.lower() == 'yesterday':
+                    date_end = datetime.date.today() - datetime.timedelta(days=1)
                 else:
-                    print("Not a correct input (example: 2010-10-10)")
+                    matchObj = re.match(regexd, args.date_end)
+                    if matchObj:
+                        date_end = datetime.date(
+                            int(matchObj[1]), int(matchObj[2]), int(matchObj[3]))
+
+                    else:
+                        print("Not a correct input (example: 2010-10-10)")
+                        sys.exit()
+                if date_end < date_start:
+                    print("Ending date is earlier than starting date.")
                     sys.exit()
-            if date_end < date_start:
-                print("Ending date is earlier than starting date.")
-                sys.exit()
-            else:
-                download_nrds_from_to(date_start, date_end)
+                else:
+                    download_nrds_from_to(date_start, date_end)
 
-    else:
-        print("Not a correct input (example: 2010-10-10)")
-        sys.exit()
-
-    try:
-        f = open(args.date + '.txt', 'r')
-    except:
-        print("No such file or directory {}.txt found. Trying domain-names.txt.".format(args.date))
+        else:
+            print("Not a correct input (example: 2010-10-10)")
+            sys.exit()
 
         try:
-            f = open('domain-names.txt', 'r')
+            f = open(args.date + '.txt', 'r')
         except:
-            print("No such file or directory domain-names.txt found")
+            print(
+                "No such file or directory {}.txt found. Trying domain-names.txt.".format(args.date))
+
+            try:
+                f = open('domain-names.txt', 'r')
+            except:
+                print("No such file or directory domain-names.txt found")
+                sys.exit()
+    else:  # if we are given a file instead of a DATE
+        if args.dfile:
+            try:
+                f = open(args.dfile, 'r')
+            except:
+                print("No such file or directory "+args.dfile+" found")
+                sys.exit()
+        else:
+            print('Error: need a file (-d) or a range of dates (-f [-t])')
             sys.exit()
     if args.search is not None:
         bitsquatting_search = bitsquatting(args.search)
@@ -637,7 +651,9 @@ if __name__ == '__main__':
             search_all[word] = bitsquatting_search + \
                 hyphenation_search+subdomain_search
             search_all[word].append(word)
-
+    else:
+        print("Nothing to search.")
+        sys.exit()
     for row in f:
         for key, argssearch_list in search_all.items():
             for argssearch in argssearch_list:
