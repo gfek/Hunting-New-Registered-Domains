@@ -660,7 +660,7 @@ if __name__ == '__main__':
             except Exception as e :
                 print('/!\ There might be an error in your regular expression. Please check on https://regex101.com/ that your regex matches what you want.')
                 print('Python error: ', e.__class__, e)
-                exit()
+                sys.exit()
             if args.regex not in DOMAINS_DICT:
                 DOMAINS_DICT[args.regex] = []
             if match:
