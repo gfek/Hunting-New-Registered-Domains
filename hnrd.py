@@ -571,9 +571,10 @@ if __name__ == '__main__':
 
     selection = parser.add_mutually_exclusive_group(required=True)
     selection.add_argument("-s", action="store", dest='search',
-                           help="search a keyword", default=None)
+                           help="Search a keyword", default=None)
     selection.add_argument("-S", action="store", dest='search_file',
                            help="File to read list of keywords from (One word per line).", default=None)
+    selection.add_argument("-r", action="store", dest="regex", help="Regex to be matched", default=None)
 
     parser.add_argument("-v", action="version", version="%(prog)s v1.0")
     args = parser.parse_args()
@@ -651,18 +652,43 @@ if __name__ == '__main__':
             search_all[word] = bitsquatting_search + \
                 hyphenation_search+subdomain_search
             search_all[word].append(word)
+    elif args.regex is not None:
+        for row in f:
+            domain = row.strip("\r\n")
+            try:
+                match = re.search(args.regex, domain)
+            except Exception as e :
+                print('/!\ There might be an error in your regular expression. Please check on https://regex101.com/ that your regex matches what you want.')
+                print('Python error: ', e.__class__, e)
+                exit()
+            if args.regex not in DOMAINS_DICT:
+                DOMAINS_DICT[args.regex] = []
+            if match:
+                DOMAINS_DICT[args.regex].append(domain)
+                DOMAINS.append(domain)
+
+        if os.path.exists('domain-names.txt'):
+            os.remove('domain-names.txt')
+        if os.path.exists(args.date + ".zip"):
+            os.remove(args.date + ".zip")
+        with open('domain-names.txt', 'a') as fout:
+            for d in DOMAINS:
+                fout.write(d)
+                fout.write('\n')
+            
     else:
         print("Nothing to search.")
         sys.exit()
-    for row in f:
-        for key, argssearch_list in search_all.items():
-            for argssearch in argssearch_list:
-                if key not in DOMAINS_DICT:
-                    DOMAINS_DICT[key] = []
-                match = re.search(r"^"+argssearch, row)
-                if match:
-                    DOMAINS_DICT[key].append(row.strip('\r\n'))
-                    DOMAINS.append(row.strip('\r\n'))
+    if args.regex is None:
+        for row in f:
+            for key, argssearch_list in search_all.items():
+                for argssearch in argssearch_list:
+                    if key not in DOMAINS_DICT:
+                        DOMAINS_DICT[key] = []
+                    match = re.search(r"^"+argssearch, row)
+                    if match:
+                        DOMAINS_DICT[key].append(row.strip('\r\n'))
+                        DOMAINS.append(row.strip('\r\n'))
 
     start = time.time()
 
